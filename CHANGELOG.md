@@ -142,3 +142,4 @@
 - index.html: og:image를 https://biroso433.com/og-image.jpg 절대 주소로, og:image 크기·alt·og:url·og:site_name·og:locale 추가, og:description "체크인, 객실 이용, 조식, 주변 정보까지 한눈에", twitter:card summary_large_image
 - 웹북 화면 내용·버전 표기는 그대로 (Claude 아티팩트 원본·검수본은 미리보기 태그가 쓰이지 않아 변경 없음)
 - 카톡은 미리보기를 캐시하므로 이미 보낸 링크는 카카오 공유 디버거에서 캐시 초기화 필요
+- 확인: 깃허브 Pages 배포 성공 (커밋 e2a4616, 2026-10-23 20:52 KST)
