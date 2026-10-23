@@ -134,3 +134,11 @@
 - 예전 주소 e-nate1004.github.io/biroso433/ 는 깃허브가 새 주소로 자동 연결
 - 새 QR코드(https://biroso433.com/, 판독 확인) → QR 안내문 디자인 버전 5, 출력용 JPG 바탕화면 저장: Guest_Guide_QR_A5_biroso433com.jpg
 - 기존 JPG(Guest_Guide_QR_A5.jpg)는 예전 주소용으로 남겨 둠 (계속 작동)
+
+## 2026-10-23 20:52 (KST) · 링크 미리보기 이미지 추가
+요청: 카톡으로 웹북 링크를 보내면 미리보기 위쪽이 빈 칸으로 나옴 → 이미지 넣기
+- 원인: og:image가 존재하지 않는 icon.png(상대 경로)를 가리키고 있었음
+- 새 파일 og-image.jpg (1200×630): 웹북 첫 화면 사진(돌담 정원·외관) + "비로소433 이용안내 웹북" 문구, 웹북 색상(#ecebe1·#5a6930)
+- index.html: og:image를 https://biroso433.com/og-image.jpg 절대 주소로, og:image 크기·alt·og:url·og:site_name·og:locale 추가, og:description "체크인, 객실 이용, 조식, 주변 정보까지 한눈에", twitter:card summary_large_image
+- 웹북 화면 내용·버전 표기는 그대로 (Claude 아티팩트 원본·검수본은 미리보기 태그가 쓰이지 않아 변경 없음)
+- 카톡은 미리보기를 캐시하므로 이미 보낸 링크는 카카오 공유 디버거에서 캐시 초기화 필요
