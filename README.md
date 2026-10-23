@@ -2,7 +2,7 @@
 
 제주 서귀포 남원리 비로소433 게스트용 이용안내 웹북입니다.
 
-- 게스트용 주소: https://e-nate1004.github.io/biroso433/
+- 게스트용 주소: https://biroso433.com/ (예전 주소 e-nate1004.github.io/biroso433/ 는 자동 연결)
 - 현재 버전: **v1.0** (2026-10-23)
 
 ## 파일

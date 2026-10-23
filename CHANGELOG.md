@@ -113,3 +113,24 @@
 - 버전 태그 v1.0: 이 작업 환경에서는 태그·릴리스 생성이 막혀 있음 → GitHub Desktop에서 0218f36 커밋에 v1.0 태그를 달고 Push
 - 바탕화면 백업: biroso433_v1.0_backup_20261023.zip
 - 보류: 서비스 워커(안드로이드 원클릭 설치 보강) — 수정안 확인 후 v1.1에서 검토
+
+## 2026-10-23 19:25 (KST) · v1.1 수정안 (승인 대기, 미게시)
+요청: 보류했던 서비스 워커 마무리
+- 새 파일 sw.js (깃허브에만): 네트워크 우선 + 오프라인 시 마지막 내용 표시, 캐시 이름 biroso433-v1.1
+- index.html: 서비스 워커 등록 코드 추가 (*.github.io 에서만 동작, Claude 웹북에서는 동작 안 함)
+- 하단 버전 표기 v1.0 → v1.1 (검수본은 "v1.1 검수본")
+- 시험: 휴대폰 크기 렌더링 스크립트 오류 없음, 서비스 워커 활성화, 인터넷 끊고 새로고침해도 웹북 정상 표시
+- 초안 위치: scratchpad/v11/
+
+## 2026-10-23 20:25 (KST) · 자체 도메인 biroso433.com
+- 가비아에서 biroso433.com 구매 (사용자 직접 결제)
+- 가비아 DNS: A @ 185.199.108.153 / .109.153 / .110.153 / .111.153, CNAME www → e-nate1004.github.io.
+- 확인: Google DNS 조회 결과 A 4개·CNAME 정상 반영
+- 다음: 깃허브 Settings → Pages → Custom domain에 biroso433.com 입력 (이 환경에서는 Pages API가 막혀 사용자가 직접), 이후 Enforce HTTPS
+
+## 2026-10-23 20:31 (KST) · 새 주소 biroso433.com 연결 완료
+- 깃허브 Pages Custom domain = biroso433.com (사용자 설정, 커밋 7c41280 "Create CNAME"), DNS check successful, Enforce HTTPS 켜짐
+- 확인: https://biroso433.com/ 에서 웹북 v1.0 정상 표시(남원리 표기, 홈 화면 추가 안내), manifest 정상
+- 예전 주소 e-nate1004.github.io/biroso433/ 는 깃허브가 새 주소로 자동 연결
+- 새 QR코드(https://biroso433.com/, 판독 확인) → QR 안내문 디자인 버전 5, 출력용 JPG 바탕화면 저장: Guest_Guide_QR_A5_biroso433com.jpg
+- 기존 JPG(Guest_Guide_QR_A5.jpg)는 예전 주소용으로 남겨 둠 (계속 작동)
