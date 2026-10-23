@@ -170,3 +170,14 @@
 - Claude 아티팩트 "게스트 문자 템플릿" 버전 2
 - 스태프 휴대폰에서 확실히 열리도록 https://biroso433.com/staff/ 에도 게시 (검색 노출 안 함 noindex, 게스트 웹북에는 링크 없음, 웹북 본문 변경 없음)
 - 시험: 아이폰·안드로이드 화면 오류 없음, 문자 링크 정상
+
+## 2026-10-23 21:29 (KST) · 오늘 작업 종료
+현재 상태
+- 게스트용 웹북: https://biroso433.com (v1.0, 미리보기 이미지 포함) = Claude 이용안내 Web_Book v94 = 검수본 v4
+- 스태프용 문자 템플릿: https://biroso433.com/staff (+ Claude 아티팩트 "게스트 문자 템플릿" v2, 비공개)
+- QR 이미지 형식 고정: assets/qr-fixed/ (손님 전송용 PNG, 출력용 A5 JPG)
+- 바탕화면: biroso433_v1.0_backup_20261023.zip, Guest_Guide_QR_A5.jpg(예전 주소), Guest_Guide_QR_A5_biroso433com.jpg, biroso433_GuestGuide_QR.png, webbook-history.md
+다음에 할 일
+- v1.1 서비스 워커: 승인 대기. 초안은 깃허브 브랜치 draft-v1.1 (sw.js, 초안 메모). 진행 시 최신 index.html(미리보기 태그 포함) 기준으로 다시 만들어 승인받기
+- 버전 태그 v1.0: GitHub Desktop에서 직접 (선택)
+- 문자 템플릿 Claude 아티팩트 공유 설정 (필요 시)
