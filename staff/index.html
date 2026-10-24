@@ -3,11 +3,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#5a6930">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<meta name="apple-mobile-web-app-title" content="비로소 레터">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>비로소433 게스트 문자 템플릿</title>
+<title>비로소 레터</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
-<style>
-/* 레이아웃: 한 줄 세로 흐름(휴대폰 우선). 손님 정보 → 문자 템플릿 4종 → QR 이미지 */
+<style>/* 레이아웃: 한 줄 세로 흐름(휴대폰 우선). 손님 정보 → 문자 템플릿 4종 → QR 이미지 */
 :root {
   --bg: #ecebe1; --surface: #faf9f3; --ink: #1d1f15; --muted: #5d5f4e; --line: #d9d7c6;
   --accent: #5a6930; --accent-ink: #faf9f3; --accent-soft: #e2e5cf; --warn: #9a5a1c;
@@ -76,32 +78,77 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 .ver { font-size: 12px; color: var(--muted); text-align: center; margin: 0; }
 @media (max-width: 520px) { .panel { grid-template-columns: minmax(0, 1fr); } .qr { grid-template-columns: minmax(0, 1fr); } .qr img { max-width: 280px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.link { font: inherit; font-size: 13px; color: var(--muted); background: none; border: 0; padding: 6px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.today { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.empty p { margin: 0; color: var(--muted); }
+.glist { display: flex; flex-direction: column; gap: 8px; }
+.glist:empty { display: none; }
+.grp { margin: 6px 0 0; font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--muted); }
+.grp:first-child { margin-top: 0; }
+.grow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 12px 14px; border-radius: 10px; background: var(--bg); }
+.grow.sent { opacity: .62; }
+.grow.sent .gsend { background: transparent; color: var(--accent); }
+.gmain { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gname { font-size: 15.5px; }
+.gmeta { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.gact { display: flex; gap: 6px; margin-left: auto; }
+.btn.sm { padding: 7px 12px; min-height: 38px; font-size: 13.5px; }
+.chip.done { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+.chip.quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.file { cursor: pointer; }
+.sr { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.flash { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 5; margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 14px; }
+.help { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px 18px; }
+.help summary { cursor: pointer; font-weight: 700; padding: 12px 0; min-height: 24px; }
+.help[open] { padding-bottom: 16px; }
+.help ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.help code { font-family: var(--mono); font-size: 12.5px; color: var(--ink); background: var(--bg); padding: 1px 5px; border-radius: 5px; word-break: break-all; }
+.help .note { margin: 10px 0; }
+.sc { margin: 16px 0 8px; font-size: 15px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 </style>
 </head><body>
 <div class="wrap">
   <header>
-    <span class="eyebrow">BIROSO 433 · STAFF</span>
-    <h1>게스트 문자 템플릿</h1>
-    <p class="lead">휴대폰 연락처 이름(<b>0325 2박 홍길동</b>)과 번호를 붙여 넣으면 날짜·박수·이름·번호가 채워지고, 오늘 보낼 문자를 표시해 드려요. <b>문자 보내기</b>를 누르고 확인 후 보내세요.</p>
+    <span class="eyebrow">BIROSO 433 · LETTER</span>
+    <h1>비로소 레터</h1>
+    <p class="lead">휴대폰 연락처에 저장한 예약(<b>0325 2박 홍길동</b>)을 불러와 오늘 보낼 문자를 골라 드려요. <b>문자 보내기</b>를 누르고 확인 후 보내세요.</p>
   </header>
 
+  <p class="flash" id="flash" role="status" hidden></p>
+
+  <section aria-labelledby="h-today">
+    <div class="sec-head">
+      <h2 id="h-today">오늘의 레터</h2>
+      <button type="button" class="link" id="btn-reset" hidden>목록 비우기</button>
+    </div>
+    <div class="today">
+      <div class="parsed" id="today-sum"></div>
+      <div id="today-list" class="glist"></div>
+      <div id="today-empty" class="empty">
+        <p>예약 손님 목록을 불러오면 <b>오늘 체크아웃 · 오늘 체크인 · 내일 체크인 · 예약 확정</b> 순서로 보낼 문자를 정리해 드려요.</p>
+      </div>
+      <div class="row">
+        <label class="btn primary file" for="f-vcf">연락처 파일 열기 (.vcf)</label>
+        <input id="f-vcf" type="file" accept=".vcf,text/vcard,text/x-vcard,text/plain" class="sr">
+        <button type="button" class="btn ghost" id="btn-pick-many" hidden>연락처에서 여러 분 고르기</button>
+      </div>
+      <p class="note" id="today-meta"></p>
+    </div>
+  </section>
+
   <section aria-labelledby="h-import">
-    <h2 id="h-import">연락처에서 손님 불러오기</h2>
+    <h2 id="h-import">레터 쓰기 · 한 분</h2>
     <div class="import">
-      <label for="f-paste">연락처 이름과 전화번호 붙여 넣기</label>
+      <label for="f-paste">연락처 이름과 전화번호</label>
       <textarea id="f-paste" rows="2" autocomplete="off" placeholder="예: 0325 2박 홍길동 010-1234-5678">0325 2박 홍길동 010-1234-5678</textarea>
       <div class="parsed" id="parsed" aria-live="polite"></div>
       <p class="note" id="parse-msg"></p>
       <div class="row">
         <button type="button" class="btn primary" id="btn-pick" hidden>연락처에서 고르기</button>
-        <button type="button" class="btn ghost" id="btn-clear">새 손님 (지우기)</button>
+        <button type="button" class="btn ghost" id="btn-clear">새 손님</button>
       </div>
-      <ul class="fmt">
-        <li>저장 형식: <code>월일 박수 이름</code> → <code>0325 2박 홍길동</code>. 날짜는 체크인 날짜예요.</li>
-        <li>외국인 손님은 끝에 언어 표시를 붙이면 문자 언어가 자동으로 바뀌어요: <code>0402 1박 John EN</code> · <code>中</code> · <code>日</code></li>
-        <li>연도는 오늘 기준으로 정해요 (지난 30일 ~ 앞으로 11개월 사이 날짜).</li>
-        <li>휴대폰 연락처에서 이름·번호를 길게 눌러 복사하거나, 연락처 공유 → 텍스트 복사로 붙여 넣으세요.</li>
-      </ul>
     </div>
   </section>
 
@@ -137,7 +184,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
           <button type="button" data-lang="ja" aria-pressed="false">日本語</button>
         </div>
       </div>
-      <p class="note field full">처음에 보이는 "홍길동"과 번호는 예시예요. <b>새 손님</b>을 누르고 실제 연락처를 붙여 넣으세요.</p>
+      <p class="note field full">처음에 보이는 "홍길동"과 번호는 예시예요. <b>새 손님</b>을 누르고 실제 연락처를 넣으세요.</p>
     </div>
   </section>
 
@@ -145,7 +192,44 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     <h2 id="h-tpl">문자 4종</h2>
     <p class="rec-line" id="rec-line"></p>
     <div id="list" style="display:flex;flex-direction:column;gap:14px"></div>
-    <p class="note">문자 길이: 한글은 2바이트, 영문·숫자는 1바이트로 셉니다. 90바이트까지 단문(SMS), 넘으면 장문(LMS)으로 보내져요. 문자 앱이 열리지 않으면 복사 버튼으로 내용을 복사해 붙여 넣으세요. 손님 전화번호는 이 화면에서만 쓰이고 저장되지 않아요.</p>
+    <p class="note">문자 길이: 한글은 2바이트, 영문·숫자는 1바이트로 셉니다. 90바이트까지 단문(SMS), 넘으면 장문(LMS)으로 보내져요. 문자 앱이 열리지 않으면 복사 버튼으로 내용을 복사해 붙여 넣으세요.</p>
+  </section>
+
+  <section aria-labelledby="h-help">
+    <h2 id="h-help">연락처를 한 번에 불러오는 방법</h2>
+    <details class="help" id="help-android">
+      <summary>안드로이드 · 공유로 불러오기</summary>
+      <ol>
+        <li>이 페이지를 크롬으로 열고 ⋮ → <b>홈 화면에 추가</b> (앱 이름: 비로소 레터)</li>
+        <li><b>한 분</b>: 연락처 앱에서 손님을 열고 <b>공유</b> → <b>비로소 레터</b>. 손님 정보가 바로 채워져요.</li>
+        <li><b>오늘의 레터</b>: 연락처 앱 → 메뉴 → <b>연락처 관리 → 연락처 가져오기/내보내기 → 내보내기</b>로 .vcf 파일을 만들고, 그 파일을 <b>공유 → 비로소 레터</b> 하거나 위의 <b>연락처 파일 열기</b>로 고르세요.</li>
+        <li>또는 <b>연락처에서 여러 분 고르기</b>로 예약 손님만 골라도 돼요.</li>
+      </ol>
+    </details>
+    <details class="help" id="help-ios">
+      <summary>아이폰 · 단축어 두 개 만들기</summary>
+      <p class="note">단축어 앱에서 한 번만 만들어 두면 돼요. 동작 이름은 단축어 앱의 검색창에 그대로 입력하면 찾을 수 있어요.</p>
+      <h3 class="sc">레터 쓰기 <span class="when">한 분을 공유로 불러오기</span></h3>
+      <ol>
+        <li>단축어 앱 → <b>+</b> → 이름을 <b>레터 쓰기</b>로 바꾸기</li>
+        <li>아래 ⓘ(설정) → <b>공유 시트에서 보기</b> 켜기, 받는 입력은 <b>연락처</b>만</li>
+        <li>동작 <b>텍스트</b> 추가 → 내용: <code>단축어 입력</code>의 <b>이름</b> · 띄어쓰기 · <code>단축어 입력</code>의 <b>전화번호</b></li>
+        <li>동작 <b>URL 인코딩</b> 추가 (입력: 텍스트)</li>
+        <li>동작 <b>URL 열기</b> 추가 → 주소: <code>https://biroso433.com/staff/#c=</code> 바로 뒤에 <code>URL 인코딩된 텍스트</code></li>
+      </ol>
+      <p class="note">사용: 연락처에서 손님 → <b>연락처 공유</b> → <b>레터 쓰기</b></p>
+      <h3 class="sc">오늘의 레터 <span class="when">예약 손님 목록 한 번에</span></h3>
+      <ol>
+        <li>새 단축어 → 이름 <b>오늘의 레터</b></li>
+        <li>동작 <b>연락처 찾기</b> → 필터 추가: <b>이름</b> · <b>다음을 포함</b> · <code>박</code></li>
+        <li>동작 <b>각 항목을 반복</b> → 안에 <b>텍스트</b>: <code>반복 항목</code>의 <b>이름</b> · 띄어쓰기 · <code>반복 항목</code>의 <b>전화번호</b></li>
+        <li>반복 끝 다음에 <b>텍스트 결합</b> (구분자: <b>새로운 줄</b>)</li>
+        <li><b>URL 인코딩</b> → <b>URL 열기</b>: <code>https://biroso433.com/staff/#list=</code> 바로 뒤에 <code>URL 인코딩된 텍스트</code></li>
+        <li>단축어를 길게 눌러 <b>홈 화면에 추가</b></li>
+      </ol>
+      <p class="note">사용: 아침에 홈 화면의 <b>오늘의 레터</b>를 누르면 오늘 보낼 문자가 정리돼 열려요.</p>
+    </details>
+    <p class="note">불러온 연락처와 보낸 기록은 이 휴대폰에만 남고 어디에도 올라가지 않아요. 보낸 기록은 스탭마다 따로예요.</p>
   </section>
 
   <section aria-labelledby="h-qr">
@@ -162,7 +246,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
       </div>
     </div>
   </section>
-  <p class="ver">v2.0 · 2026-10-24</p>
+  <p class="ver">v3.0 · 2026-10-24</p>
 </div>
 <script>
 (function () {
@@ -170,6 +254,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   var ADDR_KO = '제주 서귀포시 남원읍 태위로510번길 79-31';
   var ADDR_EN = '79-31 Taewi-ro 510beon-gil, Namwon-eup, Seogwipo, Jeju';
   var lang = 'ko';
+  var DAY = 864e5;
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
@@ -183,6 +268,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     if (l === 'ja') return m + '月' + day + '日（' + '日月火水木金土'[w] + '）';
     return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][w] + ', ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + day;
   }
+  function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
 
   // 문자 템플릿 (체크인 오후 4시, 얼리 2시·시간당 1만 원 / 체크아웃 오전 11시, 레이트 오후 1시·시간당 1만 원: 웹북 기준)
   var T = {
@@ -212,9 +298,10 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     ]
   };
   var CONTACT = { ko: '문의: ', en: 'Contact: ', zh: '联系方式：', ja: 'お問い合わせ：' };
+  var LANG_NAME = { ko: '한국어', en: 'English', zh: '中文', ja: '日本語' };
 
-  // 연락처 이름 해석: "0325 2박 홍길동 010-1234-5678" (언어 표시 EN/中/日 선택)
-  // 연도는 오늘 기준 '지난 30일 ~ 앞으로 11개월' 안에 드는 해로 정한다.
+  // ── 연락처 해석 ───────────────────────────────────────────
+  // 저장 형식 "0325 2박 홍길동" (+ 선택: EN/中/日). 연도는 오늘 기준 지난 30일 ~ 앞으로 11개월.
   function guessYear(m, d) {
     var t = today(), from = addDays(t, -30), y = t.getFullYear();
     for (var k = -1; k <= 1; k++) {
@@ -224,84 +311,232 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     }
     return null;
   }
+  var PHONE_RE = /(\+?82[\s-]?1[016789]|01[016789])[\s.-]?\d{3,4}[\s.-]?\d{4}/;
+  function normPhone(p) { var dg = p.replace(/[^0-9]/g, ''); if (dg.indexOf('82') === 0) dg = '0' + dg.slice(2); return dg.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3'); }
   function parseContact(raw) {
     var s = ' ' + (raw || '').replace(/\s+/g, ' ') + ' ', out = {};
-    var ph = s.match(/(\+?82[\s-]?1[016789]|01[016789])[\s.-]?\d{3,4}[\s.-]?\d{4}/);
-    if (ph) { var dg = ph[0].replace(/[^0-9]/g, ''); if (dg.indexOf('82') === 0) dg = '0' + dg.slice(2); out.to = dg.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3'); s = s.replace(ph[0], ' '); }
+    var ph = s.match(PHONE_RE);
+    if (ph) { out.to = normPhone(ph[0]); s = s.replace(ph[0], ' '); }
+    s = s.replace(/(휴대전화|휴대폰|핸드폰|전화번호|전화|모바일|Mobile|Phone|Tel|iPhone)\s*[:：]?/gi, ' ');
     var lg = s.match(/(?:^|[\s(\[])(EN|ENG|영어|CN|ZH|中|중|중국어|JP|JA|日|일|일본어)(?=[\s)\]]|$)/i);
     if (lg) { var L = lg[1].toUpperCase(); out.lang = /^(EN|ENG|영어)$/.test(L) ? 'en' : /^(CN|ZH|中|중|중국어)$/.test(L) ? 'zh' : 'ja'; s = s.replace(lg[0], ' '); }
     var nt = s.match(/(\d{1,2})\s*박/);
     if (nt) { out.nights = +nt[1]; s = s.replace(nt[0], ' '); }
     var dt = s.match(/(?:^|\s)(\d{1,2})[\/.\-](\d{1,2})(?=\s|$)/) || s.match(/(?:^|\s)(\d{2})(\d{2})(?=\s|$)/);
     if (dt) { var mm = +dt[1], dd = +dt[2]; if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) { out.ci = guessYear(mm, dd); out.md = pad(mm) + pad(dd); } s = s.replace(dt[0], ' '); }
-    var nm = s.replace(/[\[\]()·,|/_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    var nm = s.replace(/[\[\]()·,|/_:]+/g, ' ').replace(/\s+/g, ' ').trim();
     if (nm) out.name = nm;
     return out;
   }
+  // 예약 형식(월일 + 박)인 연락처인지
+  function isBooking(name) { return /(?:^|\s)(\d{4}|\d{1,2}[\/.\-]\d{1,2})\s+\d{1,2}\s*박/.test(' ' + name); }
 
+  // vCard(.vcf) 해석: 여러 명, Quoted-Printable·UTF-8 이름 지원
+  function qpDecode(v) {
+    var bytes = [], s = v.replace(/=\r?\n/g, '');
+    for (var i = 0; i < s.length; i++) {
+      if (s[i] === '=' && /^[0-9A-Fa-f]{2}$/.test(s.substr(i + 1, 2))) { bytes.push(parseInt(s.substr(i + 1, 2), 16)); i += 2; }
+      else { var c = s.charCodeAt(i); if (c < 128) bytes.push(c); else { var e = unescape(encodeURIComponent(s[i])); for (var k = 0; k < e.length; k++) bytes.push(e.charCodeAt(k)); } }
+    }
+    try { return new TextDecoder('utf-8').decode(new Uint8Array(bytes)); } catch (e) { return s; }
+  }
+  function parseVcf(text) {
+    var people = [], cards = text.split(/BEGIN:VCARD/i).slice(1);
+    cards.forEach(function (card) {
+      var body = card.split(/END:VCARD/i)[0];
+      body = body.replace(/=\r?\n/g, '=\u0001'); // QP 소프트 줄바꿈 보존
+      body = body.replace(/\r?\n[ \t]/g, '');     // 접힌 줄 펴기
+      var fn = '', n = '', tels = [];
+      body.split(/\r?\n/).forEach(function (line) {
+        line = line.replace(/=\u0001/g, '=\n');
+        var ci = line.indexOf(':'); if (ci < 0) return;
+        var key = line.slice(0, ci), val = line.slice(ci + 1), K = key.toUpperCase();
+        if (/QUOTED-PRINTABLE/.test(K)) val = qpDecode(val); else val = val.replace(/=\n/g, '');
+        val = val.replace(/\\,/g, ',').replace(/\\;/g, ';').trim();
+        var prop = K.split(';')[0].replace(/^ITEM\d+\./, '');
+        if (prop === 'FN') fn = val;
+        else if (prop === 'N') n = val.split(';').filter(Boolean).reverse().join(' ');
+        else if (prop === 'TEL') tels.push(val);
+      });
+      var name = fn || n, mobile = tels.filter(function (t) { return PHONE_RE.test(t); })[0] || tels[0] || '';
+      if (name) people.push(name + ' ' + mobile);
+    });
+    return people;
+  }
+  // 아무 텍스트(공유·붙여넣기·단축어·vcf)에서 사람 목록 뽑기
+  function extractPeople(text) {
+    text = text || '';
+    if (/BEGIN:VCARD/i.test(text)) return parseVcf(text);
+    var lines = text.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    var phoneLines = lines.filter(function (l) { return PHONE_RE.test(l); });
+    var bookingLines = lines.filter(function (l) { return isBooking(l) && PHONE_RE.test(l); });
+    if (bookingLines.length >= 2) return bookingLines;      // 한 줄에 한 분씩
+    if (phoneLines.length <= 1) return [lines.join(' ')];   // 한 분 (이름·번호가 여러 줄에 나뉜 공유 텍스트)
+    return phoneLines;
+  }
+  function toGuest(raw) {
+    var r = parseContact(raw); if (!r.ci || !r.to) return null;
+    var n = Math.max(1, Math.min(30, r.nights || 1));
+    return { raw: raw, name: r.name || '손님', to: r.to, ci: iso(r.ci), n: n, lang: r.lang || 'ko' };
+  }
+
+  // ── 문자 만들기 ───────────────────────────────────────────
   var IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-  function smsHref(to, text) { return 'sms:' + to + (IOS ? '&' : '?') + 'body=' + encodeURIComponent(text); }
+  function smsHref(to, text) { return 'sms:' + to.replace(/[^0-9+]/g, '') + (IOS ? '&' : '?') + 'body=' + encodeURIComponent(text); }
   function bytes(s) { var n = 0; for (var i = 0; i < s.length; i++) n += s.charCodeAt(i) > 127 ? 2 : 1; return n; }
   function $(id) { return document.getElementById(id); }
+  function staffPhone() { return $('f-phone').value.trim(); }
+  function buildText(l, idx, name, ciD, n) {
+    var v = { name: name, ci: fmt(ciD, l), co: fmt(addDays(ciD, n), l) };
+    return T[l][idx].f(v) + (staffPhone() ? '\n' + CONTACT[l] + staffPhone() : '');
+  }
+  // 오늘 보낼 문자: 0 예약 확정 / 1 전날 / 2 당일 / 3 체크아웃
+  function recIndex(ciD, n) {
+    var t = today().getTime(), ci = ciD.getTime(), co = addDays(ciD, n).getTime();
+    if (t === co) return { i: 3, why: '오늘 체크아웃' };
+    if (t === ci) return { i: 2, why: '오늘 체크인' };
+    if (t === ci - DAY) return { i: 1, why: '내일 체크인' };
+    if (t < ci - DAY) return { i: 0, why: '체크인 ' + Math.round((ci - t) / DAY) + '일 전' };
+    if (t > ci && t < co) return { i: -1, why: '머무는 중 · 체크아웃 ' + fmt(addDays(ciD, n), 'ko') };
+    return { i: -1, why: '이미 체크아웃한 손님' };
+  }
 
+  // ── 보낸 기록 (이 휴대폰에만 저장) ─────────────────────────
+  var sent = store('sentLog') || {};
+  function sentKey(g, idx) { return g.to.replace(/\D/g, '') + '|' + g.ci + '|' + idx; }
+  function markSent(k, on) {
+    if (on) sent[k] = Date.now(); else delete sent[k];
+    var cut = Date.now() - 400 * DAY; Object.keys(sent).forEach(function (x) { if (sent[x] < cut) delete sent[x]; });
+    store('sentLog', sent);
+  }
+
+  // ── 오늘의 레터 (목록) ────────────────────────────────────
+  var guests = store('guestList') || [];
+  var listAt = store('guestListAt');
+  function setGuests(people, source) {
+    var seen = {}, out = [], skipped = 0;
+    people.forEach(function (p) {
+      if (!isBooking(p)) { skipped++; return; }
+      var g = toGuest(p); if (!g) { skipped++; return; }
+      var k = g.to + g.ci; if (seen[k]) return; seen[k] = 1; out.push(g);
+    });
+    guests = out; listAt = Date.now();
+    store('guestList', guests); store('guestListAt', listAt);
+    renderList(source, people.length, skipped);
+    $('h-today').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  var GROUPS = [
+    { i: 3, t: '오늘 체크아웃' }, { i: 2, t: '오늘 체크인' }, { i: 1, t: '내일 체크인' }, { i: 0, t: '예약 확정 문자' }
+  ];
+  function renderList(source, total, skipped) {
+    var box = $('today-list'), sum = $('today-sum');
+    box.innerHTML = '';
+    if (!guests.length) {
+      sum.innerHTML = '';
+      $('today-empty').hidden = false;
+      $('today-meta').textContent = total ? '예약 형식(예: 0325 2박 홍길동)인 연락처를 찾지 못했어요. 연락처 ' + total + '개를 확인했어요.' : '';
+      $('btn-reset').hidden = true;
+      return;
+    }
+    $('today-empty').hidden = true; $('btn-reset').hidden = false;
+    var buckets = { 0: [], 1: [], 2: [], 3: [] }, staying = 0;
+    guests.forEach(function (g) {
+      var ciD = parse(g.ci), r = recIndex(ciD, g.n);
+      if (r.i < 0) { if (r.why.indexOf('머무는') === 0) staying++; return; }
+      // 체크인 전날·당일 손님도 확정 문자를 안 보냈으면 그대로 두고, 전날/당일 문자를 우선
+      buckets[r.i].push({ g: g, ciD: ciD, r: r });
+    });
+    var todo = 0, done = 0;
+    sum.innerHTML = '';
+    GROUPS.forEach(function (G) {
+      var items = buckets[G.i];
+      if (G.i === 0) items = items.filter(function (x) { return !sent[sentKey(x.g, 0)] || sent[sentKey(x.g, 0)] >= today().getTime(); }); // 예전에 보낸 확정 문자는 목록에서 뺌
+      if (!items.length) return;
+      var left = items.filter(function (x) { return !sent[sentKey(x.g, G.i)]; }).length;
+      todo += left; done += items.length - left;
+      var chip = document.createElement('span'); chip.className = 'chip' + (left ? '' : ' done');
+      chip.textContent = G.t + ' ' + items.length + (left < items.length ? ' (남음 ' + left + ')' : '');
+      sum.appendChild(chip);
+      var h = document.createElement('h3'); h.className = 'grp'; h.textContent = G.t; box.appendChild(h);
+      items.sort(function (a, b) { return a.ciD - b.ciD; }).forEach(function (x) { box.appendChild(row(x.g, x.ciD, G.i)); });
+    });
+    if (staying) { var c = document.createElement('span'); c.className = 'chip quiet'; c.textContent = '머무는 중 ' + staying; sum.appendChild(c); }
+    if (!todo && !done) { var p = document.createElement('p'); p.className = 'note'; p.textContent = '오늘 보낼 레터가 없어요. 예약 손님 ' + guests.length + '명을 확인했어요.'; box.appendChild(p); }
+    var when = listAt ? new Date(listAt) : null;
+    $('today-meta').textContent = '예약 손님 ' + guests.length + '명' + (skipped ? ' · 예약 형식이 아닌 연락처 ' + skipped + '개 제외' : '') + (when ? ' · ' + (when.getMonth() + 1) + '/' + when.getDate() + ' ' + pad(when.getHours()) + ':' + pad(when.getMinutes()) + ' 불러옴' : '');
+  }
+  function row(g, ciD, idx) {
+    var k = sentKey(g, idx), isSent = !!sent[k], l = g.lang;
+    var text = buildText(l, idx, g.name, ciD, g.n);
+    var el = document.createElement('div'); el.className = 'grow' + (isSent ? ' sent' : '');
+    el.innerHTML = '<div class="gmain"><b class="gname"></b><span class="gmeta"></span></div>' +
+      '<div class="gact"><button type="button" class="btn ghost sm gopen">자세히</button><a class="btn primary sm gsend"></a></div>';
+    el.querySelector('.gname').textContent = g.name;
+    el.querySelector('.gmeta').textContent = fmt(ciD, 'ko') + ' · ' + g.n + '박 · ' + g.to + (l !== 'ko' ? ' · ' + LANG_NAME[l] : '');
+    var a = el.querySelector('.gsend');
+    a.href = smsHref(g.to, text);
+    a.textContent = isSent ? '보냄 ✓' : '문자 보내기';
+    a.addEventListener('click', function (e) {
+      if (sent[k]) { e.preventDefault(); markSent(k, false); renderList(); return; }
+      markSent(k, true); setTimeout(renderList, 300);
+    });
+    el.querySelector('.gopen').addEventListener('click', function () { loadOne(g.raw); $('h-guest').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    return el;
+  }
+
+  // ── 한 분 불러오기 (붙여넣기·공유·단축어) ──────────────────
   function setLang(l) {
     if (!T[l]) return;
     lang = l;
     document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.lang === l)); });
   }
-
+  function loadOne(raw) { $('f-paste').value = raw.trim(); applyContact(raw); render(); }
   function applyContact(raw) {
-    var r = parseContact(raw), chips = $('parsed'), list = [];
+    var r = parseContact(raw), chips = $('parsed');
     chips.innerHTML = '';
     if (!raw.trim()) { $('parse-msg').textContent = ''; return; }
     if (r.name) $('f-name').value = r.name;
     if (r.to) $('f-to').value = r.to;
-    if (r.nights) $('f-nights').value = r.nights;
+    $('f-nights').value = r.nights || 1;
     if (r.ci) $('f-in').value = iso(r.ci);
-    if (r.lang) setLang(r.lang);
+    setLang(r.lang || 'ko');
     function chip(t, warn) { var c = document.createElement('span'); c.className = 'chip' + (warn ? ' warn' : ''); c.textContent = t; chips.appendChild(c); }
     if (r.ci) chip('체크인 ' + r.ci.getFullYear() + '년 ' + fmt(r.ci, 'ko')); else chip(r.md ? '날짜 확인 필요' : '체크인 날짜 없음', true);
     chip(r.nights ? r.nights + '박' : '박수 없음 (1박으로)', !r.nights);
     chip(r.name || '이름 없음', !r.name);
     chip(r.to || '전화번호 없음', !r.to);
-    if (r.lang) chip({ en: 'English', zh: '中文', ja: '日本語' }[r.lang] + ' 문자');
+    if (r.lang) chip(LANG_NAME[r.lang] + ' 문자');
     var miss = !r.ci || !r.name || !r.to;
     $('parse-msg').textContent = miss ? '빠진 항목은 아래 손님 정보에서 직접 채워 주세요.' : '아래 손님 정보에 채웠어요. 연도가 다르면 체크인 날짜에서 고치세요.';
   }
+  // 받은 내용 처리: 한 분이면 편집기에, 여러 분이면 오늘의 레터 목록에
+  function receive(text, source) {
+    var people = extractPeople(text);
+    if (people.length > 1) { setGuests(people, source); flash(source + '에서 연락처 ' + people.length + '개를 불러왔어요.'); }
+    else if (people.length === 1) { loadOne(people[0]); $('h-import').scrollIntoView({ behavior: 'smooth', block: 'start' }); flash(source + '에서 손님 정보를 불러왔어요.'); }
+  }
+  function flash(msg) { var f = $('flash'); f.textContent = msg; f.hidden = false; clearTimeout(flash.t); flash.t = setTimeout(function () { f.hidden = true; }, 4000); }
 
+  // ── 단일 편집기 ───────────────────────────────────────────
   function values() {
     var name = $('f-name').value.trim() || ({ ko: 'OOO', en: 'Guest', zh: 'OOO', ja: 'OOO' })[lang];
     var ci = parse($('f-in').value) || today();
     var n = Math.max(1, Math.min(30, parseInt($('f-nights').value, 10) || 1));
-    var co = addDays(ci, n);
-    return { name: name, ciD: ci, coD: co, ci: fmt(ci, lang), co: fmt(co, lang), phone: $('f-phone').value.trim(), to: $('f-to').value.replace(/[^0-9+]/g, '') };
+    return { name: name, ciD: ci, n: n, to: $('f-to').value.replace(/[^0-9+]/g, '') };
   }
-
-  // 오늘 보낼 문자: 0 예약 확정 / 1 전날 / 2 당일 / 3 체크아웃
-  function recIndex(v) {
-    var t = today().getTime(), ci = v.ciD.getTime(), co = v.coD.getTime(), day = 864e5;
-    if (t === co) return { i: 3, why: '오늘 체크아웃' };
-    if (t === ci) return { i: 2, why: '오늘 체크인' };
-    if (t === ci - day) return { i: 1, why: '내일 체크인' };
-    if (t < ci - day) return { i: 0, why: '체크인 ' + Math.round((ci - t) / day) + '일 전' };
-    if (t > ci && t < co) return { i: -1, why: '지금 머무는 중 (체크아웃 ' + fmt(v.coD, 'ko') + ')' };
-    return { i: -1, why: '이미 체크아웃한 손님' };
-  }
-
-  function copy(text, btn, label) {
-    var o = label || btn.textContent;
+  function copy(text, btn) {
+    var o = '복사';
     var done = function () { btn.textContent = '복사됨 ✓'; setTimeout(function () { btn.textContent = o; }, 1500); };
-    var fallback = function () { var pre = btn.closest('.tpl') ? btn.closest('.tpl').querySelector('.msg') : null; if (pre) { var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); } btn.textContent = '선택됨: 복사하세요'; setTimeout(function () { btn.textContent = o; }, 2500); };
+    var fallback = function () { var pre = btn.closest('.tpl').querySelector('.msg'); var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = '선택됨: 복사하세요'; setTimeout(function () { btn.textContent = o; }, 2500); };
     try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
   }
-
   function render() {
-    var v = values(), list = $('list'), rec = recIndex(v);
+    var v = values(), list = $('list'), rec = recIndex(v.ciD, v.n);
     $('rec-line').textContent = rec.i >= 0 ? '오늘 보낼 문자: ' + T.ko[rec.i].t + ' · ' + rec.why : rec.why + ' · 오늘 보낼 문자 없음';
     $('rec-line').className = 'rec-line' + (rec.i >= 0 ? '' : ' idle');
     list.innerHTML = '';
     T[lang].forEach(function (item, idx) {
-      var text = item.f(v) + (v.phone ? '\n' + CONTACT[lang] + v.phone : '');
+      var text = buildText(lang, idx, v.name, v.ciD, v.n);
       var b = bytes(text), lms = b > 90, isRec = idx === rec.i;
       var el = document.createElement('article'); el.className = 'tpl' + (isRec ? ' rec' : '');
       el.innerHTML = '<div class="tpl-head"><h3 style="margin:0;font-size:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tt"></span>' + (isRec ? '<span class="badge">오늘 보낼 문자</span>' : '') + '</h3><span class="when"></span></div><div class="msg"></div>' +
@@ -311,45 +546,89 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
       el.querySelector('.when').textContent = item.w;
       el.querySelector('.msg').textContent = text;
       el.querySelector('a').href = smsHref(v.to, text);
-      el.querySelector('button').addEventListener('click', function (e) { copy(text, e.currentTarget, '복사'); });
+      el.querySelector('a').addEventListener('click', function () { if (v.to) { markSent(sentKey({ to: v.to, ci: iso(v.ciD) }, idx), true); renderList(); } });
+      el.querySelector('button').addEventListener('click', function (e) { copy(text, e.currentTarget); });
       list.appendChild(el);
     });
   }
 
+  // ── 이벤트 ────────────────────────────────────────────────
   document.querySelectorAll('.seg button').forEach(function (b) {
-    b.addEventListener('click', function () {
-      setLang(b.dataset.lang);
-      try { localStorage.setItem('tplLang', lang); } catch (e) {}
-      render();
-    });
+    b.addEventListener('click', function () { setLang(b.dataset.lang); render(); });
   });
-  ['f-name', 'f-to', 'f-phone', 'f-in', 'f-nights'].forEach(function (id) { $(id).addEventListener('input', render); });
-  $('f-paste').addEventListener('input', function () { applyContact(this.value); render(); });
+  ['f-name', 'f-to', 'f-in', 'f-nights'].forEach(function (id) { $(id).addEventListener('input', render); });
+  $('f-phone').addEventListener('input', function () { render(); renderList(); });
+  $('f-phone').addEventListener('change', function () { store('staffPhone', $('f-phone').value.trim()); });
+  $('f-paste').addEventListener('input', function () {
+    var people = extractPeople(this.value);
+    if (people.length > 1) { setGuests(people, '붙여넣기'); this.value = ''; applyContact(''); return; }
+    applyContact(this.value); render();
+  });
   $('btn-clear').addEventListener('click', function () {
     $('f-paste').value = ''; $('f-name').value = ''; $('f-to').value = ''; $('f-nights').value = 1;
-    $('f-in').value = iso(addDays(today(), 1)); applyContact(''); render(); $('f-paste').focus();
+    $('f-in').value = iso(addDays(today(), 1)); setLang('ko'); applyContact(''); render(); $('f-paste').focus();
   });
+  $('f-vcf').addEventListener('change', function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () { receive(String(rd.result), '연락처 파일'); };
+    rd.readAsText(f, 'utf-8');
+    this.value = '';
+  });
+  $('btn-reset').addEventListener('click', function () { guests = []; listAt = null; store('guestList', null); store('guestListAt', null); renderList(); });
 
-  // 안드로이드 크롬(일반 웹 주소로 열었을 때): 연락처에서 바로 고르기
-  var pick = $('btn-pick');
-  if ('contacts' in navigator && navigator.contacts && typeof navigator.contacts.select === 'function') {
-    pick.hidden = false;
-    pick.addEventListener('click', function () {
-      navigator.contacts.select(['name', 'tel'], { multiple: false }).then(function (rs) {
-        if (!rs || !rs.length) return;
-        var c = rs[0], txt = ((c.name && c.name[0]) || '') + ' ' + ((c.tel && c.tel[0]) || '');
-        $('f-paste').value = txt.trim(); applyContact(txt); render();
-      }).catch(function () { $('parse-msg').textContent = '연락처를 열 수 없어요. 이름과 번호를 복사해 붙여 넣어 주세요.'; });
-    });
+  // 안드로이드 크롬: 연락처에서 고르기 (한 분 / 여러 분)
+  var hasPicker = 'contacts' in navigator && navigator.contacts && typeof navigator.contacts.select === 'function';
+  function pick(multiple) {
+    navigator.contacts.select(['name', 'tel'], { multiple: multiple }).then(function (rs) {
+      if (!rs || !rs.length) return;
+      var people = rs.map(function (c) { return (((c.name && c.name[0]) || '') + ' ' + ((c.tel && c.tel[0]) || '')).trim(); });
+      if (multiple) setGuests(people, '연락처'); else loadOne(people[0]);
+    }).catch(function () { flash('연락처를 열 수 없어요. 연락처 파일을 열거나 붙여 넣어 주세요.'); });
+  }
+  if (hasPicker) {
+    $('btn-pick').hidden = false; $('btn-pick-many').hidden = false;
+    $('btn-pick').addEventListener('click', function () { pick(false); });
+    $('btn-pick-many').addEventListener('click', function () { pick(true); });
   }
 
-  try { var p = localStorage.getItem('staffPhone'); if (p) $('f-phone').value = p; } catch (e) {}
-  $('f-phone').addEventListener('change', function () { try { localStorage.setItem('staffPhone', $('f-phone').value.trim()); } catch (e) {} });
-  try { var sl = localStorage.getItem('tplLang'); if (sl && T[sl]) setLang(sl); } catch (e) {}
+  // 받기: 안드로이드 공유(서비스 워커가 받아 둔 내용) · 아이폰 단축어(#c= / #list=)
+  function readIncoming() {
+    var h = location.hash || '';
+    var m = h.match(/^#(c|list)=(.*)$/);
+    if (m) {
+      var txt = ''; try { txt = decodeURIComponent(m[2].replace(/\+/g, ' ')); } catch (e) { txt = m[2]; }
+      history.replaceState(null, '', location.pathname);
+      if (m[1] === 'list') setGuests(extractPeople(txt).length > 1 ? extractPeople(txt) : txt.split(/\r?\n/), '오늘의 레터');
+      else receive(txt, '레터 쓰기');
+      return;
+    }
+    if (h === '#shared' && 'caches' in window) {
+      history.replaceState(null, '', location.pathname);
+      caches.open('staff-share').then(function (c) {
+        return c.match('/staff/__shared').then(function (res) {
+          if (!res) return;
+          return res.json().then(function (d) { c.delete('/staff/__shared'); receive(d.text || '', '공유'); });
+        });
+      }).catch(function () {});
+    }
+  }
+  if ('serviceWorker' in navigator && /\/staff\//.test(location.pathname)) {
+    navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function () {});
+  }
 
+  // 아이폰이면 단축어 안내를, 안드로이드면 공유 안내를 먼저
+  if (IOS) { $('help-ios').open = true; } else { $('help-android').open = true; }
+
+  // ── 시작 ─────────────────────────────────────────────────
+  var p = store('staffPhone'); if (p) $('f-phone').value = p;
   $('f-in').value = iso(addDays(today(), 1));
   applyContact($('f-paste').value);
   render();
+  renderList();
+  readIncoming();
+  window.addEventListener('hashchange', readIncoming);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) renderList(); });
 })();
 </script>
 </body></html>
