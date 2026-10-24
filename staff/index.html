@@ -59,6 +59,21 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
 .qr img { width: 100%; height: auto; border-radius: 10px; display: block; border: 1px solid var(--line); }
 .qr ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
 .url { font-family: var(--mono); font-size: 14px; background: var(--bg); padding: 2px 6px; border-radius: 6px; }
+.import { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; }
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.parsed { display: flex; flex-wrap: wrap; gap: 6px; min-height: 0; }
+.parsed:empty { display: none; }
+.chip { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--ink); font-variant-numeric: tabular-nums; }
+.chip.warn { background: transparent; border: 1px dashed var(--warn); color: var(--warn); }
+.rec-line { margin: 0; font-weight: 700; color: var(--accent); }
+.rec-line.idle { color: var(--muted); font-weight: 600; }
+.tpl.rec { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.badge { font-size: 12px; font-weight: 700; color: var(--accent-ink); background: var(--accent); padding: 2px 9px; border-radius: 99px; }
+.fmt { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; color: var(--muted); }
+.fmt code, .note code { font-family: var(--mono); font-size: 13px; color: var(--ink); background: var(--bg); padding: 1px 5px; border-radius: 5px; }
+.ver { font-size: 12px; color: var(--muted); text-align: center; margin: 0; }
 @media (max-width: 520px) { .panel { grid-template-columns: minmax(0, 1fr); } .qr { grid-template-columns: minmax(0, 1fr); } .qr img { max-width: 280px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -67,11 +82,31 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
   <header>
     <span class="eyebrow">BIROSO 433 · STAFF</span>
     <h1>게스트 문자 템플릿</h1>
-    <p class="lead">손님 정보를 넣고 <b>문자 보내기</b>를 누르면 문자 앱이 받는 사람과 내용이 채워진 채로 열려요. 확인하고 보내기만 누르세요.</p>
+    <p class="lead">휴대폰 연락처 이름(<b>0325 2박 홍길동</b>)과 번호를 붙여 넣으면 날짜·박수·이름·번호가 채워지고, 오늘 보낼 문자를 표시해 드려요. <b>문자 보내기</b>를 누르고 확인 후 보내세요.</p>
   </header>
 
+  <section aria-labelledby="h-import">
+    <h2 id="h-import">연락처에서 손님 불러오기</h2>
+    <div class="import">
+      <label for="f-paste">연락처 이름과 전화번호 붙여 넣기</label>
+      <textarea id="f-paste" rows="2" autocomplete="off" placeholder="예: 0325 2박 홍길동 010-1234-5678">0325 2박 홍길동 010-1234-5678</textarea>
+      <div class="parsed" id="parsed" aria-live="polite"></div>
+      <p class="note" id="parse-msg"></p>
+      <div class="row">
+        <button type="button" class="btn primary" id="btn-pick" hidden>연락처에서 고르기</button>
+        <button type="button" class="btn ghost" id="btn-clear">새 손님 (지우기)</button>
+      </div>
+      <ul class="fmt">
+        <li>저장 형식: <code>월일 박수 이름</code> → <code>0325 2박 홍길동</code>. 날짜는 체크인 날짜예요.</li>
+        <li>외국인 손님은 끝에 언어 표시를 붙이면 문자 언어가 자동으로 바뀌어요: <code>0402 1박 John EN</code> · <code>中</code> · <code>日</code></li>
+        <li>연도는 오늘 기준으로 정해요 (지난 30일 ~ 앞으로 11개월 사이 날짜).</li>
+        <li>휴대폰 연락처에서 이름·번호를 길게 눌러 복사하거나, 연락처 공유 → 텍스트 복사로 붙여 넣으세요.</li>
+      </ul>
+    </div>
+  </section>
+
   <section aria-labelledby="h-guest">
-    <h2 id="h-guest">손님 정보</h2>
+    <h2 id="h-guest">손님 정보 <span class="when">· 직접 고칠 수 있어요</span></h2>
     <div class="panel">
       <div class="field">
         <label for="f-name">손님 이름</label>
@@ -102,12 +137,13 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
           <button type="button" data-lang="ja" aria-pressed="false">日本語</button>
         </div>
       </div>
-      <p class="note field full">처음에 보이는 "홍길동"과 날짜는 예시예요. 실제 손님 정보로 바꿔서 쓰세요.</p>
+      <p class="note field full">처음에 보이는 "홍길동"과 번호는 예시예요. <b>새 손님</b>을 누르고 실제 연락처를 붙여 넣으세요.</p>
     </div>
   </section>
 
   <section aria-labelledby="h-tpl">
     <h2 id="h-tpl">문자 4종</h2>
+    <p class="rec-line" id="rec-line"></p>
     <div id="list" style="display:flex;flex-direction:column;gap:14px"></div>
     <p class="note">문자 길이: 한글은 2바이트, 영문·숫자는 1바이트로 셉니다. 90바이트까지 단문(SMS), 넘으면 장문(LMS)으로 보내져요. 문자 앱이 열리지 않으면 복사 버튼으로 내용을 복사해 붙여 넣으세요. 손님 전화번호는 이 화면에서만 쓰이고 저장되지 않아요.</p>
   </section>
@@ -126,6 +162,7 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
       </div>
     </div>
   </section>
+  <p class="ver">v2.0 · 2026-10-24</p>
 </div>
 <script>
 (function () {
@@ -135,7 +172,10 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
   var lang = 'ko';
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
   function parse(v) { var p = (v || '').split('-'); if (p.length !== 3) return null; var d = new Date(+p[0], +p[1] - 1, +p[2]); return isNaN(d) ? null : d; }
+  function today() { var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); }
+  function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
   function fmt(d, l) {
     var m = d.getMonth() + 1, day = d.getDate(), w = d.getDay();
     if (l === 'ko') return m + '월 ' + day + '일(' + '일월화수목금토'[w] + ')';
@@ -173,62 +213,143 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
   };
   var CONTACT = { ko: '문의: ', en: 'Contact: ', zh: '联系方式：', ja: 'お問い合わせ：' };
 
+  // 연락처 이름 해석: "0325 2박 홍길동 010-1234-5678" (언어 표시 EN/中/日 선택)
+  // 연도는 오늘 기준 '지난 30일 ~ 앞으로 11개월' 안에 드는 해로 정한다.
+  function guessYear(m, d) {
+    var t = today(), from = addDays(t, -30), y = t.getFullYear();
+    for (var k = -1; k <= 1; k++) {
+      var c = new Date(y + k, m - 1, d);
+      if (c.getMonth() !== m - 1) continue;
+      if (c >= from && c < addDays(from, 365)) return c;
+    }
+    return null;
+  }
+  function parseContact(raw) {
+    var s = ' ' + (raw || '').replace(/\s+/g, ' ') + ' ', out = {};
+    var ph = s.match(/(\+?82[\s-]?1[016789]|01[016789])[\s.-]?\d{3,4}[\s.-]?\d{4}/);
+    if (ph) { var dg = ph[0].replace(/[^0-9]/g, ''); if (dg.indexOf('82') === 0) dg = '0' + dg.slice(2); out.to = dg.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3'); s = s.replace(ph[0], ' '); }
+    var lg = s.match(/(?:^|[\s(\[])(EN|ENG|영어|CN|ZH|中|중|중국어|JP|JA|日|일|일본어)(?=[\s)\]]|$)/i);
+    if (lg) { var L = lg[1].toUpperCase(); out.lang = /^(EN|ENG|영어)$/.test(L) ? 'en' : /^(CN|ZH|中|중|중국어)$/.test(L) ? 'zh' : 'ja'; s = s.replace(lg[0], ' '); }
+    var nt = s.match(/(\d{1,2})\s*박/);
+    if (nt) { out.nights = +nt[1]; s = s.replace(nt[0], ' '); }
+    var dt = s.match(/(?:^|\s)(\d{1,2})[\/.\-](\d{1,2})(?=\s|$)/) || s.match(/(?:^|\s)(\d{2})(\d{2})(?=\s|$)/);
+    if (dt) { var mm = +dt[1], dd = +dt[2]; if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) { out.ci = guessYear(mm, dd); out.md = pad(mm) + pad(dd); } s = s.replace(dt[0], ' '); }
+    var nm = s.replace(/[\[\]()·,|/_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (nm) out.name = nm;
+    return out;
+  }
+
   var IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
   function smsHref(to, text) { return 'sms:' + to + (IOS ? '&' : '?') + 'body=' + encodeURIComponent(text); }
   function bytes(s) { var n = 0; for (var i = 0; i < s.length; i++) n += s.charCodeAt(i) > 127 ? 2 : 1; return n; }
   function $(id) { return document.getElementById(id); }
 
-  function values() {
-    var name = $('f-name').value.trim() || ({ ko: 'OOO', en: 'Guest', zh: 'OOO', ja: 'OOO' })[lang];
-    var ci = parse($('f-in').value) || new Date();
-    var n = Math.max(1, Math.min(30, parseInt($('f-nights').value, 10) || 1));
-    var co = new Date(ci.getFullYear(), ci.getMonth(), ci.getDate() + n);
-    return { name: name, ci: fmt(ci, lang), co: fmt(co, lang), phone: $('f-phone').value.trim(), to: $('f-to').value.replace(/[^0-9+]/g, '') };
+  function setLang(l) {
+    if (!T[l]) return;
+    lang = l;
+    document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.lang === l)); });
   }
 
-  function copy(text, btn) {
-    var done = function () { var o = btn.textContent; btn.textContent = '복사됨 ✓'; setTimeout(function () { btn.textContent = o; }, 1500); };
-    var fallback = function (pre) { var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = '선택됨: 복사하세요'; setTimeout(function () { btn.textContent = '복사'; }, 2500); };
-    var pre = btn.closest('.tpl').querySelector('.msg');
-    try { navigator.clipboard.writeText(text).then(done, function () { fallback(pre); }); } catch (e) { fallback(pre); }
+  function applyContact(raw) {
+    var r = parseContact(raw), chips = $('parsed'), list = [];
+    chips.innerHTML = '';
+    if (!raw.trim()) { $('parse-msg').textContent = ''; return; }
+    if (r.name) $('f-name').value = r.name;
+    if (r.to) $('f-to').value = r.to;
+    if (r.nights) $('f-nights').value = r.nights;
+    if (r.ci) $('f-in').value = iso(r.ci);
+    if (r.lang) setLang(r.lang);
+    function chip(t, warn) { var c = document.createElement('span'); c.className = 'chip' + (warn ? ' warn' : ''); c.textContent = t; chips.appendChild(c); }
+    if (r.ci) chip('체크인 ' + r.ci.getFullYear() + '년 ' + fmt(r.ci, 'ko')); else chip(r.md ? '날짜 확인 필요' : '체크인 날짜 없음', true);
+    chip(r.nights ? r.nights + '박' : '박수 없음 (1박으로)', !r.nights);
+    chip(r.name || '이름 없음', !r.name);
+    chip(r.to || '전화번호 없음', !r.to);
+    if (r.lang) chip({ en: 'English', zh: '中文', ja: '日本語' }[r.lang] + ' 문자');
+    var miss = !r.ci || !r.name || !r.to;
+    $('parse-msg').textContent = miss ? '빠진 항목은 아래 손님 정보에서 직접 채워 주세요.' : '아래 손님 정보에 채웠어요. 연도가 다르면 체크인 날짜에서 고치세요.';
+  }
+
+  function values() {
+    var name = $('f-name').value.trim() || ({ ko: 'OOO', en: 'Guest', zh: 'OOO', ja: 'OOO' })[lang];
+    var ci = parse($('f-in').value) || today();
+    var n = Math.max(1, Math.min(30, parseInt($('f-nights').value, 10) || 1));
+    var co = addDays(ci, n);
+    return { name: name, ciD: ci, coD: co, ci: fmt(ci, lang), co: fmt(co, lang), phone: $('f-phone').value.trim(), to: $('f-to').value.replace(/[^0-9+]/g, '') };
+  }
+
+  // 오늘 보낼 문자: 0 예약 확정 / 1 전날 / 2 당일 / 3 체크아웃
+  function recIndex(v) {
+    var t = today().getTime(), ci = v.ciD.getTime(), co = v.coD.getTime(), day = 864e5;
+    if (t === co) return { i: 3, why: '오늘 체크아웃' };
+    if (t === ci) return { i: 2, why: '오늘 체크인' };
+    if (t === ci - day) return { i: 1, why: '내일 체크인' };
+    if (t < ci - day) return { i: 0, why: '체크인 ' + Math.round((ci - t) / day) + '일 전' };
+    if (t > ci && t < co) return { i: -1, why: '지금 머무는 중 (체크아웃 ' + fmt(v.coD, 'ko') + ')' };
+    return { i: -1, why: '이미 체크아웃한 손님' };
+  }
+
+  function copy(text, btn, label) {
+    var o = label || btn.textContent;
+    var done = function () { btn.textContent = '복사됨 ✓'; setTimeout(function () { btn.textContent = o; }, 1500); };
+    var fallback = function () { var pre = btn.closest('.tpl') ? btn.closest('.tpl').querySelector('.msg') : null; if (pre) { var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); } btn.textContent = '선택됨: 복사하세요'; setTimeout(function () { btn.textContent = o; }, 2500); };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
   }
 
   function render() {
-    var v = values(), list = $('list');
+    var v = values(), list = $('list'), rec = recIndex(v);
+    $('rec-line').textContent = rec.i >= 0 ? '오늘 보낼 문자: ' + T.ko[rec.i].t + ' · ' + rec.why : rec.why + ' · 오늘 보낼 문자 없음';
+    $('rec-line').className = 'rec-line' + (rec.i >= 0 ? '' : ' idle');
     list.innerHTML = '';
-    T[lang].forEach(function (item) {
+    T[lang].forEach(function (item, idx) {
       var text = item.f(v) + (v.phone ? '\n' + CONTACT[lang] + v.phone : '');
-      var b = bytes(text), lms = b > 90;
-      var el = document.createElement('article'); el.className = 'tpl';
-      el.innerHTML = '<div class="tpl-head"><h3 style="margin:0;font-size:16px"></h3><span class="when"></span></div><div class="msg"></div>' +
+      var b = bytes(text), lms = b > 90, isRec = idx === rec.i;
+      var el = document.createElement('article'); el.className = 'tpl' + (isRec ? ' rec' : '');
+      el.innerHTML = '<div class="tpl-head"><h3 style="margin:0;font-size:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tt"></span>' + (isRec ? '<span class="badge">오늘 보낼 문자</span>' : '') + '</h3><span class="when"></span></div><div class="msg"></div>' +
         '<div class="tpl-foot"><span class="size"><b class="' + (lms ? 'lms' : '') + '">' + (lms ? '장문(LMS)' : '단문(SMS)') + '</b> · ' + b + '바이트</span>' +
         '<div class="actions"><button type="button" class="btn ghost">복사</button><a class="btn primary">문자 보내기</a></div></div>';
-      el.querySelector('h3').textContent = item.t;
+      el.querySelector('.tt').textContent = item.t;
       el.querySelector('.when').textContent = item.w;
       el.querySelector('.msg').textContent = text;
       el.querySelector('a').href = smsHref(v.to, text);
-      el.querySelector('button').addEventListener('click', function (e) { copy(text, e.currentTarget); });
+      el.querySelector('button').addEventListener('click', function (e) { copy(text, e.currentTarget, '복사'); });
       list.appendChild(el);
     });
   }
 
   document.querySelectorAll('.seg button').forEach(function (b) {
     b.addEventListener('click', function () {
-      lang = b.dataset.lang;
-      document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      setLang(b.dataset.lang);
       try { localStorage.setItem('tplLang', lang); } catch (e) {}
       render();
     });
   });
   ['f-name', 'f-to', 'f-phone', 'f-in', 'f-nights'].forEach(function (id) { $(id).addEventListener('input', render); });
+  $('f-paste').addEventListener('input', function () { applyContact(this.value); render(); });
+  $('btn-clear').addEventListener('click', function () {
+    $('f-paste').value = ''; $('f-name').value = ''; $('f-to').value = ''; $('f-nights').value = 1;
+    $('f-in').value = iso(addDays(today(), 1)); applyContact(''); render(); $('f-paste').focus();
+  });
+
+  // 안드로이드 크롬(일반 웹 주소로 열었을 때): 연락처에서 바로 고르기
+  var pick = $('btn-pick');
+  if ('contacts' in navigator && navigator.contacts && typeof navigator.contacts.select === 'function') {
+    pick.hidden = false;
+    pick.addEventListener('click', function () {
+      navigator.contacts.select(['name', 'tel'], { multiple: false }).then(function (rs) {
+        if (!rs || !rs.length) return;
+        var c = rs[0], txt = ((c.name && c.name[0]) || '') + ' ' + ((c.tel && c.tel[0]) || '');
+        $('f-paste').value = txt.trim(); applyContact(txt); render();
+      }).catch(function () { $('parse-msg').textContent = '연락처를 열 수 없어요. 이름과 번호를 복사해 붙여 넣어 주세요.'; });
+    });
+  }
+
   try { var p = localStorage.getItem('staffPhone'); if (p) $('f-phone').value = p; } catch (e) {}
   $('f-phone').addEventListener('change', function () { try { localStorage.setItem('staffPhone', $('f-phone').value.trim()); } catch (e) {} });
+  try { var sl = localStorage.getItem('tplLang'); if (sl && T[sl]) setLang(sl); } catch (e) {}
 
-  var t = new Date(); t.setDate(t.getDate() + 1);
-  $('f-in').value = t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
-  try { var sl = localStorage.getItem('tplLang'); if (sl && T[sl]) { lang = sl; document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.lang === sl)); }); } } catch (e) {}
+  $('f-in').value = iso(addDays(today(), 1));
+  applyContact($('f-paste').value);
   render();
 })();
 </script>
-
 </body></html>
