@@ -37,7 +37,7 @@ section { display: flex; flex-direction: column; gap: 12px; }
 .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .field.full { grid-column: 1 / -1; }
 label, .label { font-size: 13px; font-weight: 600; color: var(--muted); }
-input { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; width: 100%; box-sizing: border-box; }
+input, select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; width: 100%; box-sizing: border-box; }
 input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .seg button { font: inherit; font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 99px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; min-height: 40px; }
@@ -53,7 +53,7 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
 .size b { font-weight: 700; color: var(--ink); }
 .size b.lms { color: var(--warn); }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn { font: inherit; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: 10px; cursor: pointer; min-height: 40px; text-decoration: none; display: inline-flex; align-items: center; }
+.btn { font: inherit; font-size: 13.5px; font-weight: 600; padding: 4px 14px; border-radius: 8px; cursor: pointer; min-height: 32px; height: 32px; box-sizing: border-box; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); }
 .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
 
@@ -97,7 +97,8 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 .gname { font-size: 15.5px; }
 .gmeta { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .gact { display: flex; gap: 6px; margin-left: auto; }
-.btn.sm { padding: 7px 12px; min-height: 38px; font-size: 13.5px; }
+.btn.sm { padding: 4px 12px; min-height: 32px; height: 32px; box-sizing: border-box; font-size: 13.5px; border-radius: 8px; }
+.actions .btn { padding: 4px 14px; min-height: 32px; height: 32px; box-sizing: border-box; font-size: 13.5px; border-radius: 8px; }
 .chip.done { background: transparent; border: 1px solid var(--line); color: var(--muted); }
 .chip.quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); }
 .file { cursor: pointer; }
@@ -109,6 +110,46 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 .help ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .help code { font-family: var(--mono); font-size: 12.5px; color: var(--ink); background: var(--bg); padding: 1px 5px; border-radius: 5px; word-break: break-all; }
 .help .note { margin: 10px 0; }
+
+/* 예약 넣기: 촘촘한 한 줄 칸 */
+.panel.compact { gap: 6px 14px; padding: 12px 14px; }
+.panel.compact .field { flex-direction: row; align-items: center; gap: 6px; }
+.panel.compact .field > label { flex: 0 0 auto; width: 4.6em; font-size: 13px; white-space: nowrap; }
+.panel.compact .field.full > label { width: auto; }
+.panel.compact .field > input, .panel.compact .field > select { flex: 1 1 auto; min-width: 0; padding: 4px 8px; min-height: 32px; font-size: 14px; border-radius: 8px; }
+.panel.compact .field > .label { flex: 0 0 auto; width: 4.6em; font-size: 13px; white-space: nowrap; }
+#guestp .field > label, #guestp .field > .label { width: 7.2em; }
+.panel.compact p.field { display: block; margin: 0; }
+.panel.compact .seg { gap: 4px; }
+.panel.compact .seg button { min-height: 30px; padding: 3px 10px; font-size: 13px; }
+.compact-import { gap: 8px; padding: 12px 14px; }
+.compact-import > label { font-size: 13px; }
+.compact-import textarea { min-height: 34px; padding: 6px 10px; font-size: 14px; border-radius: 8px; }
+.compact-import .btn { min-height: 32px; height: 32px; box-sizing: border-box; padding: 4px 14px; font-size: 13.5px; border-radius: 8px; }
+/* 날짜 칸: 진짜 날짜 입력은 글자만 숨기고, 그 위에 2026-10-30(금) 모양으로 보여 줌 */
+.panel.compact .dt { position: relative; flex: 1 1 auto; min-width: 0; display: flex; }
+.panel.compact .dt > input { flex: 1 1 auto; min-width: 0; padding: 4px 8px; min-height: 32px; font-size: 14px; border-radius: 8px; color: transparent; cursor: pointer; }
+.panel.compact .dt > input::-webkit-datetime-edit { color: transparent; opacity: 0; }
+.panel.compact .dt > input::-webkit-datetime-edit-fields-wrapper { opacity: 0; }
+.panel.compact .dt > input::-webkit-datetime-edit-year-field:focus, .panel.compact .dt > input::-webkit-datetime-edit-month-field:focus, .panel.compact .dt > input::-webkit-datetime-edit-day-field:focus, .panel.compact .dt > input::-webkit-datetime-edit-text { background: transparent; color: transparent; }
+.panel.compact .dt > input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dt-show { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dt-show.ph { color: var(--muted); }
+.panel.compact .field.stack { flex-direction: column; align-items: stretch; gap: 6px; }
+.panel.compact .field.stack .note { margin: 0; }
+.panel.compact #b-acct { font-size: 13px; }
+.q { flex: 0 0 auto; width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font: 700 12px/1 var(--font); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; vertical-align: 2px; }
+h2 .q { margin-right: 8px; }
+.q:hover { color: var(--accent); border-color: var(--accent); }
+.tipbox { border: 1px solid var(--line); border-radius: 14px; padding: 0; max-width: min(440px, calc(100vw - 32px)); background: var(--surface); color: var(--ink); box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+.tipbox::backdrop { background: rgba(20,22,15,.45); }
+.tipbox .tb { padding: 18px 18px 6px; display: flex; flex-direction: column; gap: 8px; font-size: 14.5px; }
+.tipbox h3 { margin: 0; font-size: 16px; }
+.tipbox p, .tipbox ul { margin: 0; }
+.tipbox ul { padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.tipbox code { font-family: var(--mono); font-size: 13px; background: var(--bg); padding: 1px 5px; border-radius: 5px; }
+.tipbox .tf { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 18px 16px; }
+.tipbox a { color: var(--accent); font-size: 13.5px; }
 .sc { margin: 16px 0 8px; font-size: 15px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 </style>
 </head><body>
@@ -123,7 +164,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 
   <section aria-labelledby="h-today">
     <div class="sec-head">
-      <h2 id="h-today">오늘의 레터</h2>
+      <h2 id="h-today"><button type="button" class="q" data-tip="today" aria-label="오늘의 레터 설명">?</button>오늘의 레터</h2>
       <button type="button" class="link" id="btn-reset" hidden>목록 비우기</button>
     </div>
     <div class="today">
@@ -145,11 +186,34 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     </div>
   </section>
 
+  <section aria-labelledby="h-book">
+    <h2 id="h-book"><button type="button" class="q" data-tip="book" aria-label="예약 넣기 설명">?</button>예약 넣기 <span class="when">· 구글 캘린더 '비로소 예약'</span></h2>
+    <div class="panel compact" id="book">
+      <div class="field"><button type="button" class="q" data-tip="room" aria-label="방 설명">?</button><label for="b-room">방</label><select id="b-room"><option value="">미정</option><option value="1">1번룸</option><option value="2">2번룸</option><option value="3">3번룸</option><option value="4">4번룸</option><option value="5">5번룸</option><option value="6">6번룸</option></select></div>
+      <div class="field"><button type="button" class="q" data-tip="lang" aria-label="문자 언어 설명">?</button><label for="b-lang">문자 언어</label><select id="b-lang"><option value="">한국어</option><option value="EN">English</option><option value="中">中文</option><option value="日">日本語</option></select></div>
+      <div class="field"><button type="button" class="q" data-tip="name" aria-label="손님 이름 설명">?</button><label for="b-name">손님 이름</label><input id="b-name" type="text" autocomplete="off" placeholder="홍길동"></div>
+      <div class="field"><button type="button" class="q" data-tip="to" aria-label="전화번호 설명">?</button><label for="b-to">전화번호</label><input id="b-to" type="tel" autocomplete="off" inputmode="tel" placeholder="010-1234-5678"></div>
+      <div class="field"><button type="button" class="q" data-tip="in" aria-label="체크인 설명">?</button><label for="b-in">체크인</label><span class="dt"><input id="b-in" type="date"><span class="dt-show" id="b-in-wd" aria-hidden="true"></span></span></div>
+      <div class="field"><button type="button" class="q" data-tip="out" aria-label="체크아웃 설명">?</button><label for="b-out">체크아웃</label><span class="dt"><input id="b-out" type="date"><span class="dt-show" id="b-out-wd" aria-hidden="true"></span></span></div>
+      <div class="field full"><button type="button" class="q" data-tip="memo" aria-label="메모 설명">?</button><label for="b-memo">메모</label><input id="b-memo" type="text" autocomplete="off" placeholder="퀸 / 2인 / 현금영수증"></div>
+      <div class="field full stack">
+        <div class="parsed" id="b-sum" aria-live="polite"></div>
+        <p class="note" id="b-msg"></p>
+        <div class="row">
+          <button type="button" class="btn primary sm" id="b-go">구글 캘린더에 넣기</button>
+          <button type="button" class="btn ghost sm" id="b-clear">지우기</button>
+        </div>
+        <p class="note">열린 구글 캘린더 화면에서 확인 후 <b>저장</b>만 누르세요. 캘린더는 <b>비로소 예약</b>, 막대는 <b>박 수만큼</b> 맞춰져 있어요.</p>
+      </div>
+      <div class="field full"><button type="button" class="q" data-tip="acct" aria-label="계정 (여러 개일 때) 설명">?</button><label for="b-acct">계정 (여러 개일 때)</label><input id="b-acct" type="email" autocomplete="off" placeholder="비워 두면 기본 계정"></div>
+    </div>
+  </section>
+
   <section aria-labelledby="h-import">
-    <h2 id="h-import">레터 쓰기 · 한 분</h2>
-    <div class="import">
+    <h2 id="h-import"><button type="button" class="q" data-tip="import" aria-label="레터 쓰기 설명">?</button>레터 쓰기 · 한 분</h2>
+    <div class="import compact-import">
       <label for="f-paste">연락처 이름과 전화번호</label>
-      <textarea id="f-paste" rows="2" autocomplete="off" placeholder="예: 0325 2박 홍길동 010-1234-5678">0325 2박 홍길동 010-1234-5678</textarea>
+      <textarea id="f-paste" rows="1" autocomplete="off" placeholder="예: 0325 2박 홍길동 010-1234-5678">0325 2박 홍길동 010-1234-5678</textarea>
       <div class="parsed" id="parsed" aria-live="polite"></div>
       <p class="note" id="parse-msg"></p>
       <div class="row">
@@ -160,8 +224,8 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   </section>
 
   <section aria-labelledby="h-guest">
-    <h2 id="h-guest">손님 정보 <span class="when">· 직접 고칠 수 있어요</span></h2>
-    <div class="panel">
+    <h2 id="h-guest"><button type="button" class="q" data-tip="guest" aria-label="손님 정보 설명">?</button>손님 정보 <span class="when">· 직접 고칠 수 있어요</span></h2>
+    <div class="panel compact" id="guestp">
       <div class="field">
         <label for="f-name">손님 이름</label>
         <input id="f-name" type="text" value="홍길동" autocomplete="off">
@@ -171,12 +235,12 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
         <input id="f-to" type="tel" placeholder="010-1234-5678" autocomplete="off" inputmode="tel">
       </div>
       <div class="field">
-        <label for="f-phone">숙소 연락처 (선택)</label>
-        <input id="f-phone" type="tel" placeholder="비워 두면 문자에서 빠져요" autocomplete="off">
+        <label for="f-phone">숙소 연락처</label>
+        <input id="f-phone" type="tel" placeholder="선택 · 비워 두면 문자에서 빠져요" autocomplete="off">
       </div>
       <div class="field">
         <label for="f-in">체크인 날짜</label>
-        <input id="f-in" type="date">
+        <span class="dt"><input id="f-in" type="date"><span class="dt-show" id="f-in-wd" aria-hidden="true"></span></span>
       </div>
       <div class="field">
         <label for="f-nights">숙박 (박)</label>
@@ -196,7 +260,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   </section>
 
   <section aria-labelledby="h-tpl">
-    <h2 id="h-tpl">문자 3종</h2>
+    <h2 id="h-tpl"><button type="button" class="q" data-tip="tpl" aria-label="문자 3종 설명">?</button>문자 3종</h2>
     <p class="rec-line" id="rec-line"></p>
     <div id="list" style="display:flex;flex-direction:column;gap:14px"></div>
     <p class="note">문자 길이: 한글은 2바이트, 영문·숫자는 1바이트로 셉니다. 90바이트까지 단문(SMS), 넘으면 장문(LMS)으로 보내져요. 문자 앱이 열리지 않으면 복사 버튼으로 내용을 복사해 붙여 넣으세요.</p>
@@ -209,8 +273,9 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
       <ol>
         <li>사장님이 보내 준 <b>설정 링크</b>를 이 휴대폰에서 한 번 열면 연결돼요. 그다음부터는 이 페이지를 열 때마다 예약을 자동으로 불러와요.</li>
         <li>예약은 공용 계정(biroso433stay)의 <b>비로소 예약</b> 캘린더에 넣어요.</li>
-        <li>제목: <code>홍길동 010-1234-5678</code> · 외국 손님은 뒤에 <code>EN</code> <code>中</code> <code>日</code></li>
-        <li>날짜: <b>체크인 날 ~ 체크아웃 날</b>, <b>종일</b>로 저장. 박 수는 날짜로 자동 계산돼요.</li>
+        <li>제목: <code>3 홍길동 010-1234-5678</code> · 맨 앞 숫자는 방번호(없어도 돼요) · 외국 손님은 뒤에 <code>EN</code> <code>中</code> <code>日</code></li>
+        <li>베드·인원·요청 사항은 제목이 아니라 일정 <b>설명</b>에 적어요.</li>
+        <li>날짜: <b>체크인 날 ~ 마지막 밤(체크아웃 전날)</b>, <b>종일</b>로 저장. 막대 칸 수가 곧 박 수예요 (1박 = 하루, 2박 = 이틀).</li>
       </ol>
     </details>
     <details class="help" id="help-android">
@@ -262,7 +327,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
       </div>
     </div>
   </section>
-  <p class="ver">v3.1 · 2026-10-24</p>
+  <p class="ver">v4.9 · 2026-10-25 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -327,6 +392,9 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   function normPhone(p) { var dg = p.replace(/[^0-9]/g, ''); if (dg.indexOf('82') === 0) dg = '0' + dg.slice(2); return dg.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3'); }
   function parseContact(raw) {
     var s = ' ' + (raw || '').replace(/\s+/g, ' ') + ' ', out = {};
+    // 맨 앞 방번호(1~6): "3 홍길동", "3번 홍길동", "3번룸 홍길동", "[3] 홍길동" → 이름에서 빼고 방번호로
+    var rm = s.match(/^\s*[\[(]?([1-6])\s*(?:번\s*방|번\s*룸|번|호|방|룸)?[\])]?(?=\s)/);
+    if (rm) { out.room = +rm[1]; s = ' ' + s.slice(rm[0].length); }
     var ph = s.match(PHONE_RE);
     if (ph) { out.to = normPhone(ph[0]); s = s.replace(ph[0], ' '); }
     s = s.replace(/(휴대전화|휴대폰|핸드폰|전화번호|전화|모바일|Mobile|Phone|Tel|iPhone)\s*[:：]?/gi, ' ');
@@ -389,7 +457,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   function toGuest(raw) {
     var r = parseContact(raw); if (!r.ci || !r.to) return null;
     var n = Math.max(1, Math.min(30, r.nights || 1));
-    return { raw: raw, name: r.name || '손님', to: r.to, ci: iso(r.ci), n: n, lang: r.lang || 'ko' };
+    return { raw: raw, name: r.name || '손님', to: r.to, ci: iso(r.ci), n: n, lang: r.lang || 'ko', room: r.room || 0 };
   }
 
   // ── 문자 만들기 ───────────────────────────────────────────
@@ -486,7 +554,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     el.innerHTML = '<div class="gmain"><b class="gname"></b><span class="gmeta"></span></div>' +
       '<div class="gact"><button type="button" class="btn ghost sm gopen">자세히</button><a class="btn primary sm gsend"></a></div>';
     el.querySelector('.gname').textContent = g.name;
-    el.querySelector('.gmeta').textContent = fmt(ciD, 'ko') + ' · ' + g.n + '박 · ' + g.to + (l !== 'ko' ? ' · ' + LANG_NAME[l] : '');
+    el.querySelector('.gmeta').textContent = (g.room ? g.room + '번룸 · ' : '') + fmt(ciD, 'ko') + ' · ' + g.n + '박 · ' + g.to + (l !== 'ko' ? ' · ' + LANG_NAME[l] : '');
     var a = el.querySelector('.gsend');
     a.href = smsHref(g.to, text);
     a.textContent = isSent ? '보냄 ✓' : '문자 보내기';
@@ -608,16 +676,16 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 
   // 받기: 안드로이드 공유(서비스 워커가 받아 둔 내용) · 아이폰 단축어(#c= / #list=)
   // ── 구글 캘린더 (비로소 예약) ─────────────────────────────
-  // 일정 제목 "홍길동 010-1234-5678 EN", 체크인 날 ~ 체크아웃 날 종일 일정
+  // 일정 제목 "3 홍길동 010-1234-5678 EN", 체크인 날 ~ 마지막 밤(체크아웃 전날) 종일 일정 = 막대 칸 수가 박 수
   var cal = store('calSrc'), calAt = 0, LANG_TAG = { en: 'EN', zh: '中', ja: '日' };
   function calToGuest(ev) {
     var r = parseContact(ev.t || ''), ci = parse(ev.ci), end = parse(ev.end);
     if (!r.to || !ci) return null;
-    var n = end ? Math.round((end - ci) / DAY) - (ev.allDay ? 1 : 0) : 0; // 종일 일정의 끝 날은 체크아웃 다음 날로 옴
+    var n = end ? Math.round((end - ci) / DAY) : 0; // 종일 일정의 끝 날은 마지막 밤 다음 날(= 체크아웃 날)로 옴 → 그대로 박 수
     if (n < 1) n = r.nights || 1;
     n = Math.min(30, n);
     var name = r.name || '손님';
-    return { raw: pad(ci.getMonth() + 1) + pad(ci.getDate()) + ' ' + n + '박 ' + name + ' ' + r.to + (r.lang ? ' ' + LANG_TAG[r.lang] : ''), name: name, to: r.to, ci: iso(ci), n: n, lang: r.lang || 'ko' };
+    return { raw: pad(ci.getMonth() + 1) + pad(ci.getDate()) + ' ' + n + '박 ' + name + ' ' + r.to + (r.lang ? ' ' + LANG_TAG[r.lang] : ''), name: name, to: r.to, ci: iso(ci), n: n, lang: r.lang || 'ko', room: r.room || 0 };
   }
   function calUi() {
     $('btn-cal').hidden = !cal; $('btn-cal-off').hidden = !cal;
@@ -696,6 +764,107 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     if (document.hidden) return;
     if (cal && Date.now() - calAt > 5 * 60 * 1000) loadCal(true); else renderList();
   });
+})();
+</script>
+<script>
+/* 예약 넣기: 체크인·체크아웃 날짜로 구글 캘린더 새 일정 화면을 미리 채워 엽니다. 종일 일정 = 체크인 날 ~ 마지막 밤(막대 칸 수 = 박 수) */
+(function () {
+  var CAL_ID = '01e84fd438322663f186fa43a9e25ede388201e64d53b874420845f56365e7fb@group.calendar.google.com';
+  var PH = /(\+?82[\s-]?1[016789]|01[016789])[\s.-]?\d{3,4}[\s.-]?\d{4}/;
+  var W = ['일', '월', '화', '수', '목', '금', '토'];
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function d(v) { var p = (v || '').split('-'); if (p.length !== 3) return null; var x = new Date(+p[0], +p[1] - 1, +p[2]); return isNaN(x) ? null : x; }
+  function ymd(x) { return x.getFullYear() + pad(x.getMonth() + 1) + pad(x.getDate()); }
+  function isoD(x) { return x.getFullYear() + '-' + pad(x.getMonth() + 1) + '-' + pad(x.getDate()); }
+  function ko(x) { return (x.getMonth() + 1) + '월 ' + x.getDate() + '일(' + W[x.getDay()] + ')'; }
+  function md(x) { return (x.getMonth() + 1) + '/' + x.getDate() + '(' + W[x.getDay()] + ')'; }
+  function wd(id) { var x = d($(id).value), el = $(id + '-wd'); el.textContent = x ? isoD(x) + '(' + W[x.getDay()] + ')' : '날짜 선택'; el.classList.toggle('ph', !x); }
+  ['b-in', 'b-out'].forEach(function (id) { $(id).addEventListener('click', function () { try { this.showPicker && this.showPicker(); } catch (e) {} }); });
+  function phone(v) { var m = (v || '').match(PH); if (!m) return ''; var g = m[0].replace(/[^0-9]/g, ''); if (g.indexOf('82') === 0) g = '0' + g.slice(2); return g.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3'); }
+  function get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function put(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) {} }
+  function state() {
+    var ci = d($('b-in').value), co = d($('b-out').value), n = ci && co ? Math.round((co - ci) / 864e5) : 0;
+    var name = $('b-name').value.replace(/\s+/g, ' ').trim(), to = phone($('b-to').value), room = $('b-room').value, lang = $('b-lang').value;
+    var err = !name ? '손님 이름을 넣어 주세요.' : !to ? '휴대폰 번호(010…)를 넣어 주세요.' : !ci || !co ? '체크인·체크아웃 날짜를 골라 주세요.' : n < 1 ? '체크아웃은 체크인 다음 날 이후여야 해요.' : n > 30 ? '30박까지만 넣을 수 있어요.' : '';
+    return { ci: ci, co: co, n: n, name: name, to: to, room: room, lang: lang, err: err };
+  }
+  function render() {
+    var s = state(), sum = $('b-sum'); sum.innerHTML = ''; wd('b-in'); wd('b-out');
+    function chip(t, w) { var c = document.createElement('span'); c.className = 'chip' + (w ? ' warn' : ''); c.textContent = t; sum.appendChild(c); }
+    if (s.ci && s.co && s.n >= 1) {
+      var last = new Date(s.co.getTime() - 864e5);
+      chip(s.n + '박'); chip('막대 ' + s.n + '칸 · ' + md(s.ci) + (s.n > 1 ? '~' + md(last) : ''));
+    }
+    if (s.room) chip(s.room + '번룸');
+    $('b-msg').textContent = s.err && (s.name || s.to || s.ci || s.co) ? s.err : '';
+    $('b-go').disabled = !!s.err;
+  }
+  function url(s) {
+    var title = (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : '');
+    var memo = $('b-memo').value.trim();
+    var details = '체크인 ' + ko(s.ci) + ' · 체크아웃 ' + ko(s.co) + ' · ' + s.n + '박' + (memo ? '\n' + memo : '');
+    var q = 'action=TEMPLATE&text=' + encodeURIComponent(title) + '&dates=' + ymd(s.ci) + '/' + ymd(s.co) + // 종일 일정 끝 날(제외) = 체크아웃 날 → 막대 = 박 수
+      '&details=' + encodeURIComponent(details) + '&src=' + encodeURIComponent(CAL_ID);
+    var acct = get('bookAcct'); if (acct) q += '&authuser=' + encodeURIComponent(acct);
+    return 'https://calendar.google.com/calendar/render?' + q;
+  }
+  ['b-room', 'b-lang', 'b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
+  $('b-in').addEventListener('change', function () { var ci = d(this.value), co = d($('b-out').value); if (ci && (!co || co <= ci)) { $('b-out').value = isoD(new Date(ci.getTime() + 864e5)); render(); } });
+  $('b-go').addEventListener('click', function () { var s = state(); if (s.err) { render(); return; } window.open(url(s), '_blank', 'noopener'); });
+  $('b-clear').addEventListener('click', function () { ['b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).value = ''; }); $('b-room').value = ''; $('b-lang').value = ''; render(); });
+  $('b-acct').value = get('bookAcct');
+  $('b-acct').addEventListener('change', function () { put('bookAcct', this.value.trim()); });
+  render();
+})();
+</script>
+<dialog class="tipbox" id="tipbox" aria-labelledby="tip-title"><div class="tb"><h3 id="tip-title"></h3><div id="tip-body"></div></div><div class="tf"><a id="tip-more" href="manual.html" target="_blank" rel="noopener">설명서 전체 보기</a><button type="button" class="btn primary sm" id="tip-close">닫기</button></div></dialog>
+<script>
+/* ? 설명 팝업: 칸마다 입력 방법·뜻. 자세한 내용은 manual.html (설명서) */
+(function () {
+  var T = {
+    book: ['예약 넣기', '<p>예약을 받으면 여기에 적고 <b>구글 캘린더에 넣기</b>를 누르세요. 구글 캘린더 새 일정 화면이 다 채워져 열리고, <b>저장</b>만 누르면 끝이에요.</p><ul><li>캘린더는 <b>비로소 예약</b>으로 자동 선택</li><li>막대는 <b>박 수만큼</b> (1박 = 하루, 2박 = 이틀)</li><li>제목은 <code>2 홍길동 010-1234-5678</code> 모양으로 자동</li></ul>'],
+    room: ['방', '<p>손님이 묵을 방. 정해지지 않았으면 <b>미정</b>. 고른 방번호가 캘린더 제목 맨 앞에 들어가 달력에서 한눈에 보여요.</p><ul><li><b>1·2번룸</b> 3인 · 싱글+퀸 (1번 1층, 2번 그 위 2층)</li><li><b>3·4번룸</b> 2인 · 퀸 (3번 2층, 4번 그 아래 1층)</li><li><b>5·6번룸</b> 2인 · 슈퍼싱글 2개 (1층 나란히)</li></ul>'],
+    lang: ['문자 언어', '<p>외국 손님이면 <b>English · 中文 · 日本語</b> 중 하나. 제목 끝에 <code>EN</code> <code>中</code> <code>日</code>이 붙고, 오늘의 레터가 그 언어로 문자를 만들어요. 한국 손님은 그대로 <b>한국어</b>.</p>'],
+    name: ['손님 이름', '<p>예약자 이름. 문자 첫머리 "OOO님"에 들어가요.</p><ul><li>같은 날 같은 이름이 두 분이면 <code>홍길동 1</code>, <code>홍길동 2</code></li><li>박 수 · 인원 · 재방 같은 표시는 이름에 넣지 말고 <b>메모</b>에</li></ul>'],
+    to: ['전화번호', '<p>문자를 받을 <b>손님 휴대폰 번호 하나</b>. 010으로 시작하는 번호만 돼요. 띄어쓰기·하이픈은 있어도 없어도 괜찮아요.</p><ul><li>현금영수증 · 사업자 번호는 여기가 아니라 <b>메모</b>에</li><li>번호를 모르면 아직 넣을 수 없어요 (문자를 보낼 수 없으니까요)</li></ul>'],
+    in: ['체크인', '<p>손님이 <b>도착하는 날</b>. 고르면 체크아웃이 다음 날로 먼저 채워져요.</p>'],
+    out: ['체크아웃', '<p>손님이 <b>떠나는 날</b>. 박 수 = 체크아웃 − 체크인.</p><ul><li>캘린더 막대는 체크인 날부터 <b>마지막 밤</b>까지만 그려져요 (25일 체크인 · 27일 체크아웃 → 25·26일 이틀 = 2박)</li><li>체크아웃이 체크인과 같거나 빠르면 버튼이 눌리지 않아요</li></ul>'],
+    memo: ['메모', '<p>베드 · 인원 · 요청 사항을 자유롭게. 캘린더 일정의 <b>설명</b>에 들어가고 문자에는 들어가지 않아요.</p><p>예: <code>퀸 / 2인 / 재방 / 현금영수증 010-…</code></p>'],
+    acct: ['계정 (여러 개일 때)', '<p>이 휴대폰·컴퓨터에 구글 계정이 여러 개라 다른 계정 캘린더가 열릴 때만 적어요. <b>비로소 예약</b>을 공유받은 계정 이메일을 한 번 적어 두면 이 기기에 기억돼요.</p>'],
+    today: ['오늘의 레터', '<p>예약 목록을 불러와 <b>오늘 보낼 문자</b>를 순서대로 보여 줘요: 오늘 체크아웃 → 오늘 체크인 → 예약 확정.</p><ul><li><b>캘린더 새로 불러오기</b>: 비로소 예약 캘린더에서 다시 받아오기</li><li><b>문자 보내기</b>를 누르면 문자 앱이 열려요. 확인 후 보내면 \'보냄 ✓\'로 바뀌어요</li><li><b>자세히</b>: 아래 손님 정보로 불러와 문구를 보거나 고치기</li></ul>'],
+    import: ['레터 쓰기 · 한 분', '<p>한 분에게만 문자를 쓸 때. 연락처 이름과 번호를 붙여 넣으면 날짜 · 박 수 · 이름 · 번호가 아래 손님 정보에 채워져요.</p><p>예: <code>0325 2박 홍길동 010-1234-5678</code></p>'],
+    guest: ['손님 정보', '<p>문자에 들어갈 값을 직접 고치는 곳. 바꾸면 아래 문자 3종이 바로 바뀌어요. <b>숙소 연락처</b>는 비워 두면 문자에서 빠져요.</p>'],
+    tpl: ['문자 3종', '<p><b>예약 확정</b> · <b>체크인 당일</b> · <b>체크아웃 안내</b>. 지금 보낼 차례인 문자에 표시가 붙어요.</p><ul><li>90바이트까지 단문, 넘으면 장문으로 보내져요</li><li>문자 앱이 안 열리면 <b>복사</b> 후 붙여 넣기</li></ul>']
+  };
+  var box = document.getElementById('tipbox');
+  function open(k) {
+    var t = T[k]; if (!t) return;
+    document.getElementById('tip-title').textContent = t[0];
+    document.getElementById('tip-body').innerHTML = t[1];
+    document.getElementById('tip-more').href = 'manual.html#' + k;
+    if (box.showModal) box.showModal(); else box.setAttribute('open', '');
+  }
+  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('.q'); if (b) { e.preventDefault(); open(b.getAttribute('data-tip')); } });
+  document.getElementById('tip-close').addEventListener('click', function () { box.close ? box.close() : box.removeAttribute('open'); });
+  box.addEventListener('click', function (e) { if (e.target === box) box.close(); });
+})();
+</script>
+<script>
+/* 손님 정보 체크인 칸: 2026-10-30(금) 모양으로 표시 */
+(function () {
+  var W = ['일', '월', '화', '수', '목', '금', '토'], inp = document.getElementById('f-in'), show = document.getElementById('f-in-wd'), last = null;
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function sync() {
+    if (inp.value === last) return; last = inp.value;
+    var p = (inp.value || '').split('-'), x = p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]) : null;
+    show.textContent = x && !isNaN(x) ? x.getFullYear() + '-' + pad(x.getMonth() + 1) + '-' + pad(x.getDate()) + '(' + W[x.getDay()] + ')' : '날짜 선택';
+    show.classList.toggle('ph', !(x && !isNaN(x)));
+  }
+  inp.addEventListener('input', sync); inp.addEventListener('change', sync);
+  inp.addEventListener('click', function () { try { inp.showPicker && inp.showPicker(); } catch (e) {} });
+  setInterval(sync, 400); sync();
 })();
 </script>
 

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>비로소 레터 설명서</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #ecebe1; --surface: #faf9f3; --ink: #1d1f15; --muted: #5d5f4e; --line: #d9d7c6;
+  --accent: #5a6930; --accent-ink: #faf9f3; --accent-soft: #e2e5cf; --warn: #9a5a1c;
+  --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #14160f; --surface: #1d2016; --ink: #ecede0; --muted: #a2a58f; --line: #2f3324;
+  --accent: #b3c07a; --accent-ink: #14160f; --accent-soft: #272c1a; --warn: #e0ad62; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #14160f; --surface: #1d2016; --ink: #ecede0; --muted: #a2a58f; --line: #2f3324;
+  --accent: #b3c07a; --accent-ink: #14160f; --accent-soft: #272c1a; --warn: #e0ad62; color-scheme: dark }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.6;
+  padding: 28px max(16px, env(safe-area-inset-right, 0px)) 56px max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; color: var(--accent); }
+h1 { margin: 4px 0 0; font-size: 27px; line-height: 1.25; }
+.lead { margin: 6px 0 0; color: var(--muted); }
+nav { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; }
+nav b { font-size: 13px; color: var(--muted); }
+nav ol { margin: 6px 0 0; padding-left: 20px; columns: 2; column-gap: 24px; font-size: 14px; }
+nav a { color: var(--ink); }
+section { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; scroll-margin-top: 16px; }
+section:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+h2 { margin: 0 0 8px; font-size: 18px; }
+h3 { margin: 16px 0 6px; font-size: 15.5px; scroll-margin-top: 16px; }
+h3:target { color: var(--accent); }
+p { margin: 0 0 8px; }
+ul, ol { margin: 0 0 8px; padding-left: 20px; }
+li { margin: 3px 0; }
+code { font-family: var(--mono); font-size: 13px; background: var(--bg); padding: 1px 5px; border-radius: 5px; }
+.ex { background: var(--bg); border-radius: 10px; padding: 10px 12px; font-size: 14px; margin: 6px 0 10px; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; white-space: nowrap; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+.bar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 8px 0; font-size: 12.5px; text-align: center; }
+.bar span { padding: 6px 0; border-radius: 6px; background: var(--bg); color: var(--muted); }
+.bar span.on { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.warn { color: var(--warn); font-weight: 600; }
+.back { text-align: center; font-size: 13px; color: var(--muted); }
+.back a { color: var(--accent); }
+@media (max-width: 480px) { nav ol { columns: 1; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">BIROSO 433 · LETTER</span>
+    <h1>비로소 레터 설명서</h1>
+    <p class="lead">스탭용. 레터 화면의 <b>?</b> 를 누르면 그 칸 설명이 바로 뜨고, 여기서는 전체를 한 번에 볼 수 있어요.</p>
+  </header>
+
+  <nav aria-label="목차"><b>목차</b>
+    <ol>
+      <li><a href="#flow">하루 흐름</a></li>
+      <li><a href="#book">예약 넣기</a></li>
+      <li><a href="#calrule">캘린더 입력 규칙</a></li>
+      <li><a href="#today">오늘의 레터</a></li>
+      <li><a href="#import">레터 쓰기 · 한 분</a></li>
+      <li><a href="#guest">손님 정보</a></li>
+      <li><a href="#tpl">문자 3종</a></li>
+      <li><a href="#rooms">객실 정보</a></li>
+      <li><a href="#faq">자주 묻는 것</a></li>
+    </ol>
+  </nav>
+
+  <section id="flow">
+    <h2>1. 하루 흐름</h2>
+    <ol>
+      <li><b>예약을 받으면</b> → 레터의 <b>예약 넣기</b>에 적고 <b>구글 캘린더에 넣기</b> → 열린 화면에서 <b>저장</b></li>
+      <li><b>매일 아침</b> → 레터를 열면 <b>오늘의 레터</b>에 오늘 보낼 문자가 정리돼 있어요</li>
+      <li>손님마다 <b>문자 보내기</b> → 문자 앱에서 내용 확인 후 전송 → 목록에 <b>보냄 ✓</b></li>
+    </ol>
+    <p>보낸 기록은 각자 휴대폰에만 남아요. 같은 손님에게 두 번 보내지 않도록 보내기 전에 ✓ 표시를 확인하세요.</p>
+  </section>
+
+  <section id="book">
+    <h2>2. 예약 넣기</h2>
+    <p>예약을 받자마자 쓰는 칸이에요. 다 채우고 <b>구글 캘린더에 넣기</b>를 누르면 구글 캘린더 새 일정 화면이 미리 채워져 열립니다. 내용을 확인하고 <b>저장</b>만 누르면 끝.</p>
+    <div class="ex">예) 방 <b>2번룸</b> · 한국어 · <b>홍길동</b> · 010-1234-5678 · 체크인 10/25 · 체크아웃 10/27 · 메모 <code>퀸 / 2인</code><br>→ 캘린더 제목 <code>2 홍길동 010-1234-5678</code>, 10/25~10/26 막대 두 칸(2박), 캘린더 <b>비로소 예약</b></div>
+
+    <h3 id="room">방</h3>
+    <p>1번룸~6번룸 중 하나. 정해지지 않았으면 <b>미정</b>. 방번호가 캘린더 제목 맨 앞에 들어가서 달력에서 어느 방인지 바로 보여요. 방이 바뀌면 캘린더 일정 제목의 맨 앞 숫자만 고치면 돼요. 방 구성은 <a href="#rooms">객실 정보</a>.</p>
+
+    <h3 id="lang">문자 언어</h3>
+    <p>외국 손님이면 <b>English · 中文 · 日本語</b>. 제목 끝에 <code>EN</code> <code>中</code> <code>日</code>이 붙고, 오늘의 레터가 그 언어로 문자를 만들어요.</p>
+
+    <h3 id="name">손님 이름</h3>
+    <p>예약자 이름. 문자의 "OOO님"에 그대로 들어가요. 같은 날 같은 이름이 두 분이면 <code>홍길동 1</code>, <code>홍길동 2</code>. 박 수·인원·재방 같은 표시는 이름 말고 <b>메모</b>에.</p>
+
+    <h3 id="to">전화번호</h3>
+    <p>문자를 받을 <b>손님 휴대폰 번호 하나</b>(010…). 하이픈은 있어도 없어도 돼요. 현금영수증·사업자 번호는 <b>메모</b>에. 번호를 모르면 아직 넣을 수 없어요.</p>
+
+    <h3 id="in">체크인</h3>
+    <p>손님이 <b>도착하는 날</b>. 고르면 체크아웃이 다음 날로 먼저 채워져요.</p>
+
+    <h3 id="out">체크아웃</h3>
+    <p>손님이 <b>떠나는 날</b>. 박 수 = 체크아웃 − 체크인. 캘린더 막대는 체크인 날부터 <b>마지막 밤</b>까지만 그려져요.</p>
+    <div class="bar" aria-label="25일 체크인, 27일 체크아웃이면 25일과 26일 두 칸"><span class="on">25일 밤</span><span class="on">26일 밤</span><span>27일 아웃</span><span>28일</span></div>
+    <p>체크아웃이 체크인과 같거나 빠르면 버튼이 눌리지 않아요.</p>
+
+    <h3 id="memo">메모</h3>
+    <p>베드·인원·요청 사항을 자유롭게. 캘린더 일정의 <b>설명</b>에 들어가고 문자에는 들어가지 않아요. 예: <code>퀸 / 2인 / 재방 / 현금영수증 010-…</code></p>
+
+    <h3 id="acct">계정 (여러 개일 때)</h3>
+    <p>휴대폰이나 컴퓨터에 구글 계정이 여러 개라 다른 계정의 캘린더가 열릴 때만 적어요. <b>비로소 예약</b>을 공유받은 계정 이메일을 한 번 적으면 그 기기에 기억돼요.</p>
+  </section>
+
+  <section id="calrule">
+    <h2>3. 캘린더에 직접 넣을 때 (예약 넣기를 못 쓸 때)</h2>
+    <ul>
+      <li>캘린더: 반드시 <b>비로소 예약</b> <span class="warn">(기본값이 다른 캘린더라 꼭 바꾸기)</span></li>
+      <li>제목: <code>방번호 이름 전화번호</code> · 외국 손님은 끝에 <code>EN</code> <code>中</code> <code>日</code> — 예) <code>3 홍길동 010-1234-5678</code></li>
+      <li><b>종일</b> 켜고, 시작 = 체크인 날, 끝 = <b>마지막 밤(체크아웃 전날)</b> → 막대 칸 수 = 박 수</li>
+      <li>베드·인원·요청은 제목이 아니라 <b>설명</b>에</li>
+      <li>예약 취소 → 일정 삭제 · 날짜 변경 → 일정 옮기기</li>
+    </ul>
+    <p>네이버에서 옮겨 온 예전 예약(셋2, 트5, 재방 등)은 표기를 그대로 두었어요.</p>
+  </section>
+
+  <section id="today">
+    <h2>4. 오늘의 레터</h2>
+    <p>예약 목록을 불러와 오늘 보낼 문자를 <b>오늘 체크아웃 → 오늘 체크인 → 예약 확정</b> 순서로 보여 줘요. 각 줄에 방 · 체크인 날짜 · 박 수 · 번호가 보여요.</p>
+    <ul>
+      <li><b>캘린더 새로 불러오기</b>: 비로소 예약 캘린더에서 최신 예약을 다시 받아요</li>
+      <li><b>문자 보내기</b>: 문자 앱이 내용이 채워진 채로 열려요. 확인하고 보내세요</li>
+      <li><b>자세히</b>: 그 손님을 아래 손님 정보로 불러와 문구를 보거나 고쳐요</li>
+      <li>전화번호가 없는 일정은 목록에서 빠지고, 몇 개가 빠졌는지 아래에 적혀요</li>
+    </ul>
+  </section>
+
+  <section id="import">
+    <h2>5. 레터 쓰기 · 한 분</h2>
+    <p>한 분에게만 문자를 쓸 때. 연락처 이름과 번호를 붙여 넣으면 체크인 날짜 · 박 수 · 이름 · 번호가 손님 정보에 채워져요. 예) <code>0325 2박 홍길동 010-1234-5678</code></p>
+  </section>
+
+  <section id="guest">
+    <h2>6. 손님 정보</h2>
+    <p>문자에 들어갈 값을 직접 고치는 곳. 바꾸면 문자 3종이 바로 바뀌어요. <b>숙소 연락처</b>는 비워 두면 문자에서 빠져요.</p>
+  </section>
+
+  <section id="tpl">
+    <h2>7. 문자 3종</h2>
+    <ul>
+      <li><b>예약 확정</b>: 예약을 받은 뒤 (체크인 전날까지)</li>
+      <li><b>체크인 당일</b>: 체크인 날 (이른 체크인 안내 포함)</li>
+      <li><b>체크아웃 안내</b>: 체크아웃 날 아침 (늦은 체크아웃 안내 포함)</li>
+    </ul>
+    <p>90바이트까지 단문, 넘으면 장문으로 보내져요. 문자 앱이 열리지 않으면 <b>복사</b>해서 붙여 넣으세요. 문구는 사장님 확인 없이 바꾸지 않아요.</p>
+  </section>
+
+  <section id="rooms">
+    <h2>8. 객실 정보</h2>
+    <p>숙박동은 원룸형 객실, 2층 건물이에요.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>방</th><th>층</th><th>침대</th><th>정원</th></tr></thead>
+      <tbody>
+        <tr><td>1번룸</td><td>1층 (2번룸 아래)</td><td>싱글 1 + 퀸 1</td><td>3인</td></tr>
+        <tr><td>2번룸</td><td>2층 (1번룸 위)</td><td>싱글 1 + 퀸 1</td><td>3인</td></tr>
+        <tr><td>3번룸</td><td>2층 (4번룸 위)</td><td>퀸 1</td><td>2인</td></tr>
+        <tr><td>4번룸</td><td>1층 (3번룸 아래)</td><td>퀸 1</td><td>2인</td></tr>
+        <tr><td>5번룸</td><td>1층 (6번룸과 나란히)</td><td>슈퍼싱글 2</td><td>2인</td></tr>
+        <tr><td>6번룸</td><td>1층 (5번룸과 나란히)</td><td>슈퍼싱글 2</td><td>2인</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="faq">
+    <h2>9. 자주 묻는 것</h2>
+    <h3>캘린더에 넣었는데 오늘의 레터에 안 나와요</h3>
+    <ul>
+      <li><b>캘린더 새로 불러오기</b>를 눌러 보세요</li>
+      <li>캘린더가 <b>비로소 예약</b>인지, 제목에 <b>010 전화번호</b>가 있는지 확인</li>
+      <li>오늘 보낼 차례가 아닌 손님은 목록에 없어요 (체크인 당일·체크아웃 날·예약 확정 대상만)</li>
+    </ul>
+    <h3>박 수가 하루 다르게 나와요</h3>
+    <p>막대가 체크아웃 날까지 그려져 있으면 하루 더 계산돼요. 일정 끝 날짜를 <b>체크아웃 전날</b>로 고치세요. 예약 넣기로 넣으면 자동으로 맞춰져요.</p>
+    <h3>다른 계정 캘린더가 열려요</h3>
+    <p>예약 넣기 맨 아래 <b>계정</b> 칸에 비로소 예약을 공유받은 이메일을 적어 두세요.</p>
+  </section>
+
+  <p class="back">비로소 레터 설명서 v1.0 · 2026-10-25 · <a href="./">레터로 돌아가기</a></p>
+</div>
+</body>
+</html>
