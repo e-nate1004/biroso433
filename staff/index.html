@@ -444,7 +444,8 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     if (!guests.length) {
       sum.innerHTML = '';
       $('today-empty').hidden = false;
-      $('today-meta').textContent = !total ? '' : listSrc === 'cal' ? '전화번호가 있는 예약 일정을 찾지 못했어요. 캘린더 일정 ' + total + '개를 확인했어요.' : '예약 형식(예: 0325 2박 홍길동)인 연락처를 찾지 못했어요. 연락처 ' + total + '개를 확인했어요.';
+      var at = listAt ? new Date(listAt) : null, atTxt = at ? ' · ' + (at.getMonth() + 1) + '/' + at.getDate() + ' ' + pad(at.getHours()) + ':' + pad(at.getMinutes()) + ' 불러옴' : '';
+      $('today-meta').textContent = !total ? (listSrc === 'cal' && at ? '캘린더에 예약이 없어요' + atTxt : '') : listSrc === 'cal' ? '전화번호가 있는 예약 일정을 찾지 못했어요. 캘린더 일정 ' + total + '개를 확인했어요.' : '예약 형식(예: 0325 2박 홍길동)인 연락처를 찾지 못했어요. 연락처 ' + total + '개를 확인했어요.';
       $('btn-reset').hidden = true;
       return;
     }
