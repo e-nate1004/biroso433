@@ -65,6 +65,9 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
 textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; }
 textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.row:not(:has(> :not([hidden]):not(.sr))) { display: none; }
+.load-row { flex-wrap: nowrap; }
+.load-row .btn { flex: 1 1 auto; min-width: 0; justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-inline: 8px; font-size: 13.5px; letter-spacing: -0.01em; }
 .parsed { display: flex; flex-wrap: wrap; gap: 6px; min-height: 0; }
 .parsed:empty { display: none; }
 .chip { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--ink); font-variant-numeric: tabular-nums; }
@@ -129,14 +132,14 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
       <div id="today-empty" class="empty">
         <p>예약 손님 목록을 불러오면 <b>오늘 체크아웃 · 오늘 체크인 · 예약 확정</b> 순서로 보낼 문자를 정리해 드려요.</p>
       </div>
-      <div class="row" id="cal-row" hidden>
-        <button type="button" class="btn primary" id="btn-cal">캘린더 새로 불러오기</button>
-        <button type="button" class="link" id="btn-cal-off">캘린더 연결 해제</button>
+      <div class="row load-row">
+        <button type="button" class="btn primary" id="btn-cal" hidden>캘린더 새로 불러오기</button>
+        <label class="btn primary file" id="l-vcf" for="f-vcf">연락처 파일 열기</label>
+        <input id="f-vcf" type="file" accept=".vcf,text/vcard,text/x-vcard,text/plain" class="sr">
       </div>
       <div class="row">
-        <label class="btn primary file" for="f-vcf">연락처 파일 열기 (.vcf)</label>
-        <input id="f-vcf" type="file" accept=".vcf,text/vcard,text/x-vcard,text/plain" class="sr">
         <button type="button" class="btn ghost" id="btn-pick-many" hidden>연락처에서 여러 분 고르기</button>
+        <button type="button" class="link" id="btn-cal-off" hidden>캘린더 연결 해제</button>
       </div>
       <p class="note" id="today-meta"></p>
     </div>
@@ -616,7 +619,11 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     var name = r.name || '손님';
     return { raw: pad(ci.getMonth() + 1) + pad(ci.getDate()) + ' ' + n + '박 ' + name + ' ' + r.to + (r.lang ? ' ' + LANG_TAG[r.lang] : ''), name: name, to: r.to, ci: iso(ci), n: n, lang: r.lang || 'ko' };
   }
-  function calUi() { $('cal-row').hidden = !cal; if (cal) $('help-cal').open = true; }
+  function calUi() {
+    $('btn-cal').hidden = !cal; $('btn-cal-off').hidden = !cal;
+    $('l-vcf').className = 'btn ' + (cal ? 'ghost' : 'primary') + ' file';
+    if (cal) $('help-cal').open = true;
+  }
   function loadCal(quiet) {
     if (!cal || !cal.u) return;
     calAt = Date.now();
