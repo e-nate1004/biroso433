@@ -135,6 +135,7 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 .panel.compact .dt > input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .dt-show { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .dt-show.ph { color: var(--muted); }
+.btn.off { opacity: .45; }
 .panel.compact .field.stack { flex-direction: column; align-items: stretch; gap: 6px; }
 .panel.compact .field.stack .note { margin: 0; }
 .panel.compact #b-acct { font-size: 13px; }
@@ -200,7 +201,7 @@ h2 .q { margin-right: 8px; }
         <div class="parsed" id="b-sum" aria-live="polite"></div>
         <p class="note" id="b-msg"></p>
         <div class="row">
-          <button type="button" class="btn primary sm" id="b-go">구글 캘린더에 넣기</button>
+          <a class="btn primary sm" id="b-go" role="button" target="_blank" rel="noopener">구글 캘린더에 넣기</a>
           <button type="button" class="btn ghost sm" id="b-clear">지우기</button>
         </div>
         <p class="note">열린 구글 캘린더 화면에서 확인 후 <b>저장</b>만 누르세요. 캘린더는 <b>비로소 예약</b>, 막대는 <b>박 수만큼</b> 맞춰져 있어요.</p>
@@ -327,7 +328,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.9 · 2026-10-25 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.10 · 2026-10-25 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -799,7 +800,7 @@ h2 .q { margin-right: 8px; }
     }
     if (s.room) chip(s.room + '번룸');
     $('b-msg').textContent = s.err && (s.name || s.to || s.ci || s.co) ? s.err : '';
-    $('b-go').disabled = !!s.err;
+    var go = $('b-go'); if (s.err) { go.removeAttribute('href'); go.classList.add('off'); go.setAttribute('aria-disabled', 'true'); } else { go.href = url(s); go.classList.remove('off'); go.removeAttribute('aria-disabled'); }
   }
   function url(s) {
     var title = (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : '');
@@ -812,7 +813,15 @@ h2 .q { margin-right: 8px; }
   }
   ['b-room', 'b-lang', 'b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
   $('b-in').addEventListener('change', function () { var ci = d(this.value), co = d($('b-out').value); if (ci && (!co || co <= ci)) { $('b-out').value = isoD(new Date(ci.getTime() + 864e5)); render(); } });
-  $('b-go').addEventListener('click', function () { var s = state(); if (s.err) { render(); return; } window.open(url(s), '_blank', 'noopener'); });
+  $('b-go').addEventListener('click', function (e) {
+    var s = state();
+    if (s.err) { // 빠진 칸 안내 후 그 칸으로
+      e.preventDefault(); $('b-msg').textContent = s.err;
+      var first = !s.name ? 'b-name' : !s.to ? 'b-to' : !s.ci ? 'b-in' : 'b-out'; try { $(first).focus(); } catch (x) {}
+      return;
+    }
+    this.href = url(s); // 링크로 바로 이동 (팝업 차단에 막히지 않게)
+  });
   $('b-clear').addEventListener('click', function () { ['b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).value = ''; }); $('b-room').value = ''; $('b-lang').value = ''; render(); });
   $('b-acct').value = get('bookAcct');
   $('b-acct').addEventListener('change', function () { put('bookAcct', this.value.trim()); });
