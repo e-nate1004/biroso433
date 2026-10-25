@@ -203,8 +203,9 @@ h2 .q { margin-right: 8px; }
         <div class="row">
           <a class="btn primary sm" id="b-go" role="button" target="_blank" rel="noopener">구글 캘린더에 넣기</a>
           <button type="button" class="btn ghost sm" id="b-clear">지우기</button>
+          <a class="link" id="b-web" target="_blank" rel="noopener" hidden>앱 대신 웹으로 열기</a>
         </div>
-        <p class="note">열린 구글 캘린더 화면에서 확인 후 <b>저장</b>만 누르세요. 캘린더는 <b>비로소 예약</b>, 막대는 <b>박 수만큼</b> 맞춰져 있어요.</p>
+        <p class="note" id="b-note">열린 구글 캘린더 화면에서 확인 후 <b>저장</b>만 누르세요. 캘린더는 <b>비로소 예약</b>, 막대는 <b>박 수만큼</b> 맞춰져 있어요.</p>
       </div>
       <div class="field full"><button type="button" class="q" data-tip="acct" aria-label="계정 (여러 개일 때) 설명">?</button><label for="b-acct">계정 (여러 개일 때)</label><input id="b-acct" type="email" autocomplete="off" placeholder="비워 두면 기본 계정"></div>
     </div>
@@ -328,7 +329,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.10 · 2026-10-25 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.11 · 2026-10-25 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -800,7 +801,8 @@ h2 .q { margin-right: 8px; }
     }
     if (s.room) chip(s.room + '번룸');
     $('b-msg').textContent = s.err && (s.name || s.to || s.ci || s.co) ? s.err : '';
-    var go = $('b-go'); if (s.err) { go.removeAttribute('href'); go.classList.add('off'); go.setAttribute('aria-disabled', 'true'); } else { go.href = url(s); go.classList.remove('off'); go.removeAttribute('aria-disabled'); }
+    var go = $('b-go'); if (s.err) { go.removeAttribute('href'); go.classList.add('off'); go.setAttribute('aria-disabled', 'true'); } else { go.href = ANDROID ? appUrl(s) : url(s); go.classList.remove('off'); go.removeAttribute('aria-disabled'); }
+    var web = $('b-web'); web.hidden = !ANDROID || !!s.err; if (!s.err) web.href = url(s);
   }
   function url(s) {
     var title = (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : '');
@@ -811,6 +813,22 @@ h2 .q { margin-right: 8px; }
     var acct = get('bookAcct'); if (acct) q += '&authuser=' + encodeURIComponent(acct);
     return 'https://calendar.google.com/calendar/render?' + q;
   }
+  // 안드로이드: 구글 캘린더 앱의 새 일정 화면으로 (앱이 없으면 웹으로). 종일 일정의 끝 = 마지막 밤(앱 화면 기준) → 막대 = 박 수
+  var ANDROID = /Android/i.test(navigator.userAgent);
+  function appUrl(s) {
+    var title = (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : '');
+    var memo = $('b-memo').value.trim();
+    var details = '체크인 ' + ko(s.ci) + ' · 체크아웃 ' + ko(s.co) + ' · ' + s.n + '박' + (memo ? '\n' + memo : '');
+    var last = new Date(s.co.getFullYear(), s.co.getMonth(), s.co.getDate() - 1);
+    function e(v) { return encodeURIComponent(v); }
+    return 'intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;' +
+      'S.title=' + e(title) + ';S.description=' + e(details) + ';l.beginTime=' + s.ci.getTime() + ';l.endTime=' + last.getTime() +
+      ';B.allDay=true;S.browser_fallback_url=' + e(url(s)) + ';end';
+  }
+  if (ANDROID) {
+    $('b-go').textContent = '구글 캘린더 앱에 넣기'; $('b-go').removeAttribute('target');
+    $('b-note').innerHTML = '구글 캘린더 앱 새 일정 화면이 열려요. 위쪽 캘린더가 <b>비로소 예약</b>인지 확인하고 <b>저장</b>하세요. 막대는 <b>박 수만큼</b> 맞춰져 있어요.';
+  }
   ['b-room', 'b-lang', 'b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
   $('b-in').addEventListener('change', function () { var ci = d(this.value), co = d($('b-out').value); if (ci && (!co || co <= ci)) { $('b-out').value = isoD(new Date(ci.getTime() + 864e5)); render(); } });
   $('b-go').addEventListener('click', function (e) {
@@ -820,7 +838,7 @@ h2 .q { margin-right: 8px; }
       var first = !s.name ? 'b-name' : !s.to ? 'b-to' : !s.ci ? 'b-in' : 'b-out'; try { $(first).focus(); } catch (x) {}
       return;
     }
-    this.href = url(s); // 링크로 바로 이동 (팝업 차단에 막히지 않게)
+    this.href = ANDROID ? appUrl(s) : url(s); // 링크로 바로 이동 (팝업 차단에 막히지 않게)
   });
   $('b-clear').addEventListener('click', function () { ['b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).value = ''; }); $('b-room').value = ''; $('b-lang').value = ''; render(); });
   $('b-acct').value = get('bookAcct');
