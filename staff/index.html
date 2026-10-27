@@ -332,7 +332,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.13 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.14 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -817,16 +817,17 @@ h2 .q { margin-right: 8px; }
     var acct = get('bookAcct'); if (acct) q += '&authuser=' + encodeURIComponent(acct);
     return 'https://calendar.google.com/calendar/render?' + q;
   }
-  // 안드로이드: 구글 캘린더 앱의 새 일정 화면으로 (앱이 없으면 웹으로). 종일 일정의 끝 = 마지막 밤(앱 화면 기준) → 막대 = 박 수
+  // 안드로이드: 구글 캘린더 앱의 새 일정 화면으로 (앱이 없으면 웹으로).
+  // 종일 일정은 UTC 0시 기준, 끝은 체크아웃 날(제외)로 보내야 앱이 마지막 밤까지 그림 → 막대 = 박 수 (v4.14: 전엔 하루 짧았음)
   var ANDROID = /Android/i.test(navigator.userAgent);
   function appUrl(s) {
     var title = (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : '');
     var memo = $('b-memo').value.trim();
     var details = '체크인 ' + ko(s.ci) + ' · 체크아웃 ' + ko(s.co) + ' · ' + s.n + '박' + (memo ? '\n' + memo : '');
-    var last = new Date(s.co.getFullYear(), s.co.getMonth(), s.co.getDate() - 1);
+    var b = Date.UTC(s.ci.getFullYear(), s.ci.getMonth(), s.ci.getDate()), f = Date.UTC(s.co.getFullYear(), s.co.getMonth(), s.co.getDate());
     function e(v) { return encodeURIComponent(v); }
     return 'intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;' +
-      'S.title=' + e(title) + ';S.description=' + e(details) + ';l.beginTime=' + s.ci.getTime() + ';l.endTime=' + last.getTime() +
+      'S.title=' + e(title) + ';S.description=' + e(details) + ';l.beginTime=' + b + ';l.endTime=' + f +
       ';B.allDay=true;S.browser_fallback_url=' + e(url(s)) + ';end';
   }
   // 바로 저장: 캘린더 연결(설정 링크)이 된 휴대폰이면 Apps Script로 바로 저장. 아니면 예전처럼 캘린더 화면 열기
@@ -921,7 +922,7 @@ h2 .q { margin-right: 8px; }
 /* ? 설명 팝업: 칸마다 입력 방법·뜻. 자세한 내용은 manual.html (설명서) */
 (function () {
   var T = {
-    book: ['예약 넣기', '<p>예약을 받으면 여기에 적고 <b>구글 캘린더 앱에 넣기</b>(아이폰은 <b>구글 캘린더에 넣기</b>)를 누르세요. 새 일정 화면이 다 채워져 열리고, <b>저장</b>만 누르면 끝이에요.</p><ul><li>캘린더가 연결된 휴대폰에는 <b>바로 저장</b> 버튼도 보여요 (화면 이동 없이 저장 · 중복 알림 · 20초 되돌리기)</li><li>캘린더는 <b>비로소 예약</b>으로 자동 선택</li><li>막대는 <b>박 수만큼</b> (1박 = 하루, 2박 = 이틀)</li><li>제목은 <code>2 홍길동 010-1234-5678</code> 모양으로 자동</li></ul>'],
+    book: ['예약 넣기', '<p>예약을 받으면 여기에 적고 <b>구글 캘린더 앱에 넣기</b>(아이폰은 <b>구글 캘린더에 넣기</b>)를 누르세요. 새 일정 화면이 다 채워져 열리고, <b>저장</b>만 누르면 끝이에요.</p><ul><li>캘린더가 연결된 휴대폰에는 <b>바로 저장</b> 버튼도 보여요 (화면 이동 없이 저장 · 중복 알림 · 20초 되돌리기)</li><li>캘린더: 웹은 <b>비로소 예약</b>으로 자동 선택, 앱은 위쪽 칩에서 <b>비로소 예약</b>을 직접 눌러 주세요</li><li>막대는 <b>박 수만큼</b> (1박 = 하루, 2박 = 이틀)</li><li>제목은 <code>2 홍길동 010-1234-5678</code> 모양으로 자동</li></ul>'],
     room: ['방', '<p>손님이 묵을 방. 정해지지 않았으면 <b>미정</b>. 고른 방번호가 캘린더 제목 맨 앞에 들어가 달력에서 한눈에 보여요.</p><ul><li><b>1·2번룸</b> 3인 · 싱글+퀸 (1번 1층, 2번 그 위 2층)</li><li><b>3·4번룸</b> 2인 · 퀸 (3번 2층, 4번 그 아래 1층)</li><li><b>5·6번룸</b> 2인 · 슈퍼싱글 2개 (1층 나란히)</li></ul>'],
     lang: ['문자 언어', '<p>외국 손님이면 <b>English · 中文 · 日本語</b> 중 하나. 제목 끝에 <code>EN</code> <code>中</code> <code>日</code>이 붙고, 오늘의 레터가 그 언어로 문자를 만들어요. 한국 손님은 그대로 <b>한국어</b>.</p>'],
     name: ['손님 이름', '<p>예약자 이름. 문자 첫머리 "OOO님"에 들어가요.</p><ul><li>같은 날 같은 이름이 두 분이면 <code>홍길동 1</code>, <code>홍길동 2</code></li><li>박 수 · 인원 · 재방 같은 표시는 이름에 넣지 말고 <b>메모</b>에</li></ul>'],
