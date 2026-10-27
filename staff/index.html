@@ -182,6 +182,10 @@ h2 .q { margin-right: 8px; }
         <button type="button" class="btn ghost" id="btn-pick-many" hidden>연락처에서 여러 분 고르기</button>
         <button type="button" class="link" id="btn-cal-off" hidden>캘린더 연결 해제</button>
       </div>
+      <div class="row" id="cal-link-row">
+        <input id="cal-link" type="url" autocomplete="off" placeholder="설정 링크 붙여넣기 → 구글 캘린더 연결" aria-label="설정 링크 붙여넣기" style="flex:1;min-width:0">
+        <button type="button" class="btn ghost sm" id="btn-cal-link">연결</button>
+      </div>
       <p class="note" id="today-meta"></p>
     </div>
   </section>
@@ -200,8 +204,8 @@ h2 .q { margin-right: 8px; }
         <div class="parsed" id="b-sum" aria-live="polite"></div>
         <p class="note" id="b-msg"></p>
         <div class="row">
+          <button type="button" class="btn primary sm" id="b-direct" hidden>바로 저장</button>
           <a class="btn primary sm" id="b-go" role="button" target="_blank" rel="noopener">구글 캘린더에 넣기</a>
-          <button type="button" class="btn ghost sm" id="b-direct" hidden>바로 저장</button>
           <button type="button" class="btn ghost sm" id="b-force" hidden>그래도 저장</button>
           <button type="button" class="btn ghost sm" id="b-undo" hidden>되돌리기</button>
           <button type="button" class="btn ghost sm" id="b-clear">지우기</button>
@@ -276,7 +280,7 @@ h2 .q { margin-right: 8px; }
     <details class="help" id="help-cal">
       <summary>구글 캘린더 · 비로소 예약 (추천)</summary>
       <ol>
-        <li>사장님이 보내 준 <b>설정 링크</b>를 이 휴대폰에서 한 번 열면 연결돼요. 그다음부터는 이 페이지를 열 때마다 예약을 자동으로 불러와요.</li>
+        <li>사장님이 보내 준 <b>설정 링크</b>를 이 휴대폰에서 한 번 열면 연결돼요. 링크가 안 열리면 링크(메시지 전체도 돼요)를 복사해서 오늘의 레터의 <b>설정 링크 붙여넣기</b> 칸에 붙여 넣으세요. 그다음부터는 이 페이지를 열 때마다 예약을 자동으로 불러와요.</li>
         <li>예약은 공용 계정(biroso433stay)의 <b>비로소 예약</b> 캘린더에 넣어요.</li>
         <li>제목: <code>3 홍길동 010-1234-5678</code> · 맨 앞 숫자는 방번호(없어도 돼요) · 외국 손님은 뒤에 <code>EN</code> <code>中</code> <code>日</code></li>
         <li>베드·인원·요청 사항은 제목이 아니라 일정 <b>설명</b>에 적어요.</li>
@@ -332,7 +336,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.15 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.16 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -693,7 +697,7 @@ h2 .q { margin-right: 8px; }
     return { raw: pad(ci.getMonth() + 1) + pad(ci.getDate()) + ' ' + n + '박 ' + name + ' ' + r.to + (r.lang ? ' ' + LANG_TAG[r.lang] : ''), name: name, to: r.to, ci: iso(ci), n: n, lang: r.lang || 'ko', room: r.room || 0 };
   }
   function calUi() {
-    $('btn-cal').hidden = !cal; $('btn-cal-off').hidden = !cal;
+    $('btn-cal').hidden = !cal; $('btn-cal-off').hidden = !cal; $('cal-link-row').hidden = !!cal;
     $('l-vcf').className = 'btn ' + (cal ? 'ghost' : 'primary') + ' file';
     if (cal) $('help-cal').open = true;
   }
@@ -722,18 +726,30 @@ h2 .q { margin-right: 8px; }
   $('btn-cal').addEventListener('click', function () { loadCal(); });
   $('btn-cal-off').addEventListener('click', function () { cal = null; store('calSrc', null); calUi(); flash('캘린더 연결을 해제했어요.'); });
 
+  // 설정 링크 → { u: 웹 앱 주소, k: 키 }. 앞뒤 글자·줄바꿈·인코딩(%7C 등)이 섞여 있어도 찾아냄
+  function parseCalLink(t) {
+    var x = String(t || '').replace(/\s+/g, '');
+    for (var i = 0; i < 3 && /%[0-9a-f]{2}/i.test(x); i++) { try { x = decodeURIComponent(x); } catch (e) { break; } }
+    var m = x.match(/(https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec)\|([0-9a-f]{32})(?![0-9a-f])/i);
+    return m ? { u: m[1], k: m[2] } : null;
+  }
+  function connectCal(t) {
+    var c = parseCalLink(t);
+    if (!c) { flash('설정 링크가 올바르지 않아요. 링크 전체를 다시 복사해 주세요.'); return false; }
+    cal = c; store('calSrc', cal); calUi(); flash('구글 캘린더를 연결했어요.'); loadCal();
+    window.dispatchEvent(new Event('biroso:callinked'));
+    return true;
+  }
+  function pasteLink() { var el = $('cal-link'); if (connectCal(el.value)) el.value = ''; }
+  $('btn-cal-link').addEventListener('click', pasteLink);
+  $('cal-link').addEventListener('paste', function () { setTimeout(pasteLink, 0); });
   function readIncoming() {
     var h = location.hash || '';
     var m = h.match(/^#(c|list|cal)=(.*)$/);
     if (m) {
       var txt = ''; try { txt = decodeURIComponent(m[2].replace(/\+/g, ' ')); } catch (e) { txt = m[2]; }
       history.replaceState(null, '', location.pathname);
-      if (m[1] === 'cal') {
-        var cut = txt.lastIndexOf('|');
-        if (cut > 0 && /^https:\/\/script\.google\.com\//.test(txt)) { cal = { u: txt.slice(0, cut), k: txt.slice(cut + 1) }; store('calSrc', cal); calUi(); flash('구글 캘린더를 연결했어요.'); loadCal(); }
-        else flash('설정 링크가 올바르지 않아요. 사장님께 다시 받아 주세요.');
-        return;
-      }
+      if (m[1] === 'cal') { connectCal(txt); return; }
       if (m[1] === 'list') setGuests(extractPeople(txt).length > 1 ? extractPeople(txt) : txt.split(/\r?\n/), '오늘의 레터');
       else receive(txt, '레터 쓰기');
       return;
@@ -806,7 +822,7 @@ h2 .q { margin-right: 8px; }
     if (s.room) chip(s.room + '번룸');
     $('b-msg').textContent = s.err && (s.name || s.to || s.ci || s.co) ? s.err : '';
     var go = $('b-go'); if (s.err) { go.removeAttribute('href'); go.classList.add('off'); go.setAttribute('aria-disabled', 'true'); } else { go.href = ANDROID ? appUrl(s) : url(s); go.classList.remove('off'); go.removeAttribute('aria-disabled'); }
-    mode(); var web = $('b-web'); web.hidden = !ANDROID || !!s.err; if (!s.err) web.href = url(s);
+    var direct = mode(), web = $('b-web'); web.hidden = !ANDROID || !!s.err || direct; if (!s.err) web.href = url(s);
   }
   function url(s) {
     var title = (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : '');
@@ -844,6 +860,15 @@ h2 .q { margin-right: 8px; }
     var direct = !!link(), go = $('b-go'), web = $('b-web'), dbtn = $('b-direct');
     dbtn.hidden = !direct; if (!busy) dbtn.textContent = '바로 저장';
     web.textContent = '앱 대신 웹으로 열기';
+    // 캘린더가 연결된 휴대폰: '바로 저장'이 큰 버튼(저장 화면 없이 바로 들어감), 캘린더 화면 열기는 작은 버튼으로
+    go.classList.toggle('primary', !direct); go.classList.toggle('ghost', direct);
+    if (direct) {
+      go.textContent = ANDROID ? '캘린더 앱으로 넣기' : '캘린더 화면으로 넣기';
+      if (ANDROID) go.removeAttribute('target'); else go.setAttribute('target', '_blank');
+      web.hidden = true;
+      $('b-note').innerHTML = '<b>바로 저장</b>을 누르면 저장 화면 없이 <b>비로소 예약</b>에 바로 들어가요. 막대는 <b>박 수만큼</b>, 같은 예약이 이미 있으면 알려 드려요. 잘못 넣었으면 20초 안에 <b>되돌리기</b>.';
+      return direct;
+    }
     if (ANDROID) {
       go.textContent = '구글 캘린더 앱에 넣기'; go.removeAttribute('target');
       $('b-note').innerHTML = '구글 캘린더 <b>앱</b>의 새 일정 화면이 다 채워져 열려요. 위쪽 캘린더가 <b>비로소 예약</b>인지 확인하고 <b>저장</b>하세요. 막대는 <b>박 수만큼</b> 맞춰져 있어요.';
@@ -851,6 +876,7 @@ h2 .q { margin-right: 8px; }
       go.textContent = '구글 캘린더에 넣기'; go.setAttribute('target', '_blank');
       $('b-note').innerHTML = '구글 캘린더 새 일정 화면이 다 채워져 열려요(아이폰은 앱이 아니라 웹 화면). 캘린더가 <b>비로소 예약</b>인지 확인하고 <b>저장</b>만 누르세요.';
     }
+    $('b-note').innerHTML += ' <span style="color:var(--muted)">저장 화면 없이 넣으려면 사장님께 받은 <b>설정 링크</b>를 위쪽 <b>설정 링크 붙여넣기</b> 칸에 붙여 넣으세요 → <b>바로 저장</b> 버튼이 생겨요.</span>';
     return direct;
   }
   function fail(why) {
@@ -874,7 +900,7 @@ h2 .q { margin-right: 8px; }
           return;
         }
         if (d && d.error === 'dup') { busy = false; mode(); $('b-force').hidden = false; stat('이미 같은 예약이 있어요: ' + d.t + '. 다른 예약이면 「그래도 저장」을 누르세요.', true); return; }
-        fail(d && d.error === 'key' ? '캘린더 연결 키가 맞지 않아 저장하지 못했어요.' : d && d.error === 'calendar' ? '"비로소 예약" 캘린더를 찾지 못했어요.' : '저장하지 못했어요.');
+        fail(d && d.error === 'key' ? '캘린더 연결 키가 바뀌어 저장하지 못했어요. 새 설정 링크를 이 휴대폰에서 한 번 열어 주세요. 지금은' : d && d.error === 'calendar' ? '"비로소 예약" 캘린더를 찾지 못했어요.' : '저장하지 못했어요.');
       })
       .catch(function () { fail('저장하지 못했어요(인터넷 연결 또는 캘린더 설정 확인).'); });
   }
@@ -913,6 +939,9 @@ h2 .q { margin-right: 8px; }
     this.href = ANDROID ? appUrl(s) : url(s); // 링크로 바로 이동 (팝업 차단에 막히지 않게)
   });
   $('b-clear').addEventListener('click', function () { ['b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).value = ''; }); $('b-room').value = ''; $('b-lang').value = ''; render(); });
+  // 페이지가 열린 채로 설정 링크를 열면(주소 # 만 바뀜) 연결 뒤 버튼을 바로 다시 그림
+  window.addEventListener('hashchange', function () { setTimeout(render, 0); });
+  window.addEventListener('biroso:callinked', function () { setTimeout(render, 0); });
   $('b-acct').value = get('bookAcct');
   $('b-acct').addEventListener('change', function () { put('bookAcct', this.value.trim()); });
   render();
@@ -923,7 +952,7 @@ h2 .q { margin-right: 8px; }
 /* ? 설명 팝업: 칸마다 입력 방법·뜻. 자세한 내용은 manual.html (설명서) */
 (function () {
   var T = {
-    book: ['예약 넣기', '<p>예약을 받으면 여기에 적고 <b>구글 캘린더 앱에 넣기</b>(아이폰은 <b>구글 캘린더에 넣기</b>)를 누르세요. 새 일정 화면이 다 채워져 열리고, <b>저장</b>만 누르면 끝이에요.</p><ul><li>캘린더가 연결된 휴대폰에는 <b>바로 저장</b> 버튼도 보여요 (화면 이동 없이 저장 · 중복 알림 · 20초 되돌리기)</li><li>캘린더: 웹은 <b>비로소 예약</b>으로 자동 선택, 앱은 위쪽 칩에서 <b>비로소 예약</b>을 직접 눌러 주세요</li><li>막대는 <b>박 수만큼</b> (1박 = 하루, 2박 = 이틀)</li><li>제목은 <code>2 홍길동 010-1234-5678</code> 모양으로 자동</li></ul>'],
+    book: ['예약 넣기', '<p>예약을 받으면 여기에 적고 <b>구글 캘린더 앱에 넣기</b>(아이폰은 <b>구글 캘린더에 넣기</b>)를 누르세요. 새 일정 화면이 다 채워져 열리고, <b>저장</b>만 누르면 끝이에요.</p><ul><li>캘린더가 연결된 휴대폰(설정 링크를 연 휴대폰)은 큰 버튼이 <b>바로 저장</b>이에요. 저장 화면 없이 바로 들어가요 (중복 알림 · 20초 되돌리기)</li><li>캘린더: 웹은 <b>비로소 예약</b>으로 자동 선택, 앱은 위쪽 칩에서 <b>비로소 예약</b>을 직접 눌러 주세요</li><li>막대는 <b>박 수만큼</b> (1박 = 하루, 2박 = 이틀)</li><li>제목은 <code>2 홍길동 010-1234-5678</code> 모양으로 자동</li></ul>'],
     room: ['방', '<p>손님이 묵을 방. 정해지지 않았으면 <b>미정</b>. 고른 방번호가 캘린더 제목 맨 앞에 들어가 달력에서 한눈에 보여요.</p><ul><li><b>1·2번룸</b> 3인 · 싱글+퀸 (1번 1층, 2번 그 위 2층)</li><li><b>3·4번룸</b> 2인 · 퀸 (3번 2층, 4번 그 아래 1층)</li><li><b>5·6번룸</b> 2인 · 슈퍼싱글 2개 (1층 나란히)</li></ul>'],
     lang: ['문자 언어', '<p>외국 손님이면 <b>English · 中文 · 日本語</b> 중 하나. 제목 끝에 <code>EN</code> <code>中</code> <code>日</code>이 붙고, 오늘의 레터가 그 언어로 문자를 만들어요. 한국 손님은 그대로 <b>한국어</b>.</p>'],
     name: ['손님 이름', '<p>예약자 이름. 문자 첫머리 "OOO님"에 들어가요.</p><ul><li>같은 날 같은 이름이 두 분이면 <code>홍길동 1</code>, <code>홍길동 2</code></li><li>박 수 · 인원 · 재방 같은 표시는 이름에 넣지 말고 <b>메모</b>에</li></ul>'],
