@@ -12,16 +12,16 @@
 <style>/* 레이아웃: 한 줄 세로 흐름(휴대폰 우선). 손님 정보 → 문자 템플릿 3종 → QR 이미지 */
 :root {
   --bg: #ecebe1; --surface: #faf9f3; --ink: #1d1f15; --muted: #5d5f4e; --line: #d9d7c6;
-  --accent: #5a6930; --accent-ink: #faf9f3; --accent-soft: #e2e5cf; --warn: #9a5a1c;
+  --accent: #5a6930; --accent-ink: #faf9f3; --accent-soft: #e2e5cf; --warn: #9a5a1c; --danger: #c8231c; --danger-soft: #fdecea;
   --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Noto Sans KR", "PingFang SC", "Hiragino Sans", system-ui, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #14160f; --surface: #1d2016; --ink: #ecede0; --muted: #a2a58f; --line: #2f3324;
-  --accent: #b3c07a; --accent-ink: #14160f; --accent-soft: #272c1a; --warn: #e0ad62; color-scheme: dark } }
+  --accent: #b3c07a; --accent-ink: #14160f; --accent-soft: #272c1a; --warn: #e0ad62; --danger: #ff6b5e; --danger-soft: #3a1714; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #14160f; --surface: #1d2016; --ink: #ecede0; --muted: #a2a58f; --line: #2f3324;
-  --accent: #b3c07a; --accent-ink: #14160f; --accent-soft: #272c1a; --warn: #e0ad62; color-scheme: dark }
+  --accent: #b3c07a; --accent-ink: #14160f; --accent-soft: #272c1a; --warn: #e0ad62; --danger: #ff6b5e; --danger-soft: #3a1714; color-scheme: dark }
 
 body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.55;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 48px; }
@@ -97,6 +97,35 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 .gname { font-size: 15.5px; }
 .gmeta { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .gact { display: flex; gap: 6px; margin-left: auto; }
+.grow { position: relative; }
+.grow { flex-wrap: nowrap; min-height: 40px; padding: 4px 4px 4px 8px; gap: 6px; box-sizing: border-box; }
+.grow .gpick { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; cursor: pointer; }
+.grow .gmain { display: block; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.grow .gname { font-size: 14.5px; margin-right: 5px; }
+.grow .gmeta { font-size: 12.5px; letter-spacing: -.01em; }
+.grow .gact { flex: none; margin-left: 0; gap: 4px; }
+.grow .gact .btn { padding: 4px 10px; }
+.gchk { width: 20px; height: 20px; }
+.grow.clash { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-soft); }
+.grow.clash .gmeta { color: var(--danger); font-weight: 700; }
+.chip.danger { background: var(--danger-soft); border: 2px solid var(--danger); color: var(--danger); font-weight: 700; }
+.picks { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.picks .lbl { font-size: 13px; color: var(--muted); margin-right: auto; }
+.gchk { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--accent); }
+.grow.sent .gchk { visibility: hidden; }
+.grp-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
+.grp-head:first-child { margin-top: 0; }
+.grp-head .grp { margin: 0; }
+.warnbox { border: 2px solid var(--danger); background: var(--danger-soft); color: var(--danger); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.55; }
+.warnbox b { display: block; margin-bottom: 2px; }
+.warnbox { font-size: 15px; }
+.warnbox .wline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 0; }
+.warnbox .wroom { font-weight: 700; width: 100%; }
+.warnbox .wlink { display: inline-flex; align-items: center; min-height: 40px; box-sizing: border-box; padding: 6px 12px; border-radius: 8px; border: 2px solid var(--danger); background: var(--bg); color: var(--danger); font-weight: 700; font-size: 15px; text-decoration: none; }
+.warnbox .wlink::after { content: '›'; margin-left: 8px; font-size: 18px; }
+.bulk { position: sticky; bottom: 8px; z-index: 2; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 4px 18px rgba(0,0,0,.18); }
+.bulk .btn.primary { flex: 1; }
+.bulk-msg { width: 100%; margin: 0; font-size: 13px; color: var(--muted); }
 .btn.sm { padding: 4px 12px; min-height: 32px; height: 32px; box-sizing: border-box; font-size: 13.5px; border-radius: 8px; }
 .actions .btn { padding: 4px 14px; min-height: 32px; height: 32px; box-sizing: border-box; font-size: 13.5px; border-radius: 8px; }
 .chip.done { background: transparent; border: 1px solid var(--line); color: var(--muted); }
@@ -169,9 +198,15 @@ h2 .q { margin-right: 8px; }
     </div>
     <div class="today">
       <div class="parsed" id="today-sum"></div>
+      <div class="warnbox" id="today-warn" role="alert" hidden></div>
       <div id="today-list" class="glist"></div>
+      <div class="bulk" id="bulk" hidden>
+        <button type="button" class="btn primary" id="btn-bulk">선택한 문자 차례로 보내기</button>
+        <button type="button" class="btn ghost sm" id="btn-bulk-stop" hidden>그만</button>
+        <p class="bulk-msg" id="bulk-msg"></p>
+      </div>
       <div id="today-empty" class="empty">
-        <p>예약 손님 목록을 불러오면 <b>오늘 체크아웃 · 오늘 체크인 · 예약 확정</b> 순서로 보낼 문자를 정리해 드려요.</p>
+        <p>예약 손님 목록을 불러오면 <b>예약 확정 · 오늘 체크인 · 오늘 체크아웃</b> 순서로 보낼 문자를 정리해 드려요.</p>
       </div>
       <div class="row load-row">
         <button type="button" class="btn primary" id="btn-cal" hidden>캘린더 새로 불러오기</button>
@@ -212,6 +247,7 @@ h2 .q { margin-right: 8px; }
           <a class="link" id="b-web" target="_blank" rel="noopener" hidden>앱 대신 웹으로 열기</a>
         </div>
         <p class="note" id="b-stat" aria-live="polite" hidden></p>
+        <a class="btn ghost sm" id="b-open" hidden>캘린더 앱에서 보기</a>
         <p class="note" id="b-note">열린 구글 캘린더 화면에서 확인 후 <b>저장</b>만 누르세요. 캘린더는 <b>비로소 예약</b>, 막대는 <b>박 수만큼</b> 맞춰져 있어요.</p>
       </div>
       <div class="field full"><button type="button" class="q" data-tip="acct" aria-label="계정 (여러 개일 때) 설명">?</button><label for="b-acct">계정 (여러 개일 때)</label><input id="b-acct" type="email" autocomplete="off" placeholder="비워 두면 기본 계정"></div>
@@ -336,7 +372,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.16 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.18 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -492,9 +528,11 @@ h2 .q { margin-right: 8px; }
   // ── 보낸 기록 (이 휴대폰에만 저장) ─────────────────────────
   var sent = store('sentLog') || {};
   var SENT_NO = [0, 2, 3]; // 예전 보낸 기록 번호 유지 (0 확정 · 2 당일 · 3 체크아웃)
-  function sentKey(g, idx) { return g.to.replace(/\D/g, '') + '|' + g.ci + '|' + SENT_NO[idx]; }
+  // 같은 번호로 여러 분이 예약(가족 등)해도 따로 기록되게 이름까지 붙임. 예전 기록(번호|날짜|종류)도 그대로 인정
+  function sentKey(g, idx) { return g.to.replace(/\D/g, '') + '|' + g.ci + '|' + SENT_NO[idx] + '|' + g.name; }
+  function sentAt(k) { return sent[k] || sent[k.split('|').slice(0, 3).join('|')] || 0; }
   function markSent(k, on) {
-    if (on) sent[k] = Date.now(); else delete sent[k];
+    if (on) sent[k] = Date.now(); else { delete sent[k]; delete sent[k.split('|').slice(0, 3).join('|')]; }
     var cut = Date.now() - 400 * DAY; Object.keys(sent).forEach(function (x) { if (sent[x] < cut) delete sent[x]; });
     store('sentLog', sent);
   }
@@ -508,7 +546,7 @@ h2 .q { margin-right: 8px; }
     people.forEach(function (p) {
       if (!isBooking(p)) { skipped++; return; }
       var g = toGuest(p); if (!g) { skipped++; return; }
-      var k = g.to + g.ci; if (seen[k]) return; seen[k] = 1; out.push(g);
+      var k = g.to + g.ci + '|' + g.name; if (seen[k]) return; seen[k] = 1; out.push(g);
     });
     guests = out; listAt = Date.now(); listSrc = 'contacts';
     store('guestList', guests); store('guestListAt', listAt); store('guestListSrc', listSrc);
@@ -516,17 +554,48 @@ h2 .q { margin-right: 8px; }
     $('h-today').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   var GROUPS = [
-    { i: 2, t: '오늘 체크아웃' }, { i: 1, t: '오늘 체크인' }, { i: 0, t: '예약 확정 문자' }
+    { i: 0, t: '예약 확정 문자' }, { i: 1, t: '오늘 체크인' }, { i: 2, t: '오늘 체크아웃' }
   ];
+  var unpicked = {}; // 체크 해제한 문자 (이 화면에서만)
+  var QROWS = []; // 지금 화면의 줄 (보내는 순서: 예약 확정 → 오늘 체크인 → 오늘 체크아웃)
+  // ── 일괄 보내기: 체크한 문자를 한 건씩 차례로 문자 앱에 채워 엶 ──
+  // 웹 페이지는 문자를 직접 보낼 수 없어 문자 앱에서 '보내기'는 한 번씩 눌러야 해요. 돌아오면 다음 손님이 준비돼 있어요.
+  var queue = null;
+  function bulkUi() {
+    var bar = $('bulk'), btn = $('btn-bulk'), msg = $('bulk-msg'), stop = $('btn-bulk-stop');
+    if (queue) {
+      var next = queue.list[queue.i];
+      if (!next) { var n = queue.list.length; queue = null; bar.hidden = false; stop.hidden = true; btn.textContent = '다 보냈어요 ✓ ' + n + '건'; btn.disabled = true; msg.textContent = '문자 앱에서 모두 보냈는지 확인해 주세요.'; setTimeout(bulkUi, 4000); return; }
+      bar.hidden = false; btn.disabled = false; stop.hidden = false;
+      btn.textContent = (queue.i ? '다음: ' : '') + next.name + ' 문자 열기 (' + (queue.i + 1) + '/' + queue.list.length + ')';
+      msg.textContent = queue.i ? '문자 앱에서 보내기를 누르고 돌아왔으면 다음 손님을 여세요.' : '문자 앱이 열리면 내용을 확인하고 보내기를 누른 뒤 이 화면으로 돌아오세요.';
+      return;
+    }
+    var picked = QROWS.filter(function (r) { return r.picked && !r.sent; });
+    bar.hidden = !picked.length; stop.hidden = true; btn.disabled = false;
+    btn.textContent = '체크한 ' + picked.length + '건 일괄 보내기';
+    msg.textContent = '예약 확정 → 체크인 → 체크아웃 순서로 한 건씩 문자 앱에 채워 열어요. 문자 앱에서 보내기를 누르고 돌아오면 다음 손님이 준비돼 있어요.';
+  }
+  function bulkNext() {
+    if (!queue) {
+      var list = QROWS.filter(function (r) { return r.picked && !r.sent; });
+      if (!list.length) return;
+      queue = { list: list, i: 0 };
+    }
+    var it = queue.list[queue.i]; if (!it) { bulkUi(); return; }
+    markSent(it.k, true); queue.i++;
+    location.href = it.href; // 문자 앱 열기 (버튼을 누른 순간이라 막히지 않음)
+    setTimeout(function () { renderList(); }, 400);
+  }
   function renderList(source, total, skipped) {
     var box = $('today-list'), sum = $('today-sum');
-    box.innerHTML = '';
+    box.innerHTML = ''; renderWarn(); QROWS = [];
     if (!guests.length) {
       sum.innerHTML = '';
       $('today-empty').hidden = false;
       var at = listAt ? new Date(listAt) : null, atTxt = at ? ' · ' + (at.getMonth() + 1) + '/' + at.getDate() + ' ' + pad(at.getHours()) + ':' + pad(at.getMinutes()) + ' 불러옴' : '';
       $('today-meta').textContent = !total ? (listSrc === 'cal' && at ? '캘린더에 예약이 없어요' + atTxt : '') : listSrc === 'cal' ? '전화번호가 있는 예약 일정을 찾지 못했어요. 캘린더 일정 ' + total + '개를 확인했어요.' : '예약 형식(예: 0325 2박 홍길동)인 연락처를 찾지 못했어요. 연락처 ' + total + '개를 확인했어요.';
-      $('btn-reset').hidden = true;
+      $('btn-reset').hidden = true; bulkUi();
       return;
     }
     $('today-empty').hidden = true; $('btn-reset').hidden = false;
@@ -541,34 +610,71 @@ h2 .q { margin-right: 8px; }
     sum.innerHTML = '';
     GROUPS.forEach(function (G) {
       var items = buckets[G.i];
-      if (G.i === 0) items = items.filter(function (x) { return !sent[sentKey(x.g, 0)] || sent[sentKey(x.g, 0)] >= today().getTime(); }); // 예전에 보낸 확정 문자는 목록에서 뺌
+      if (G.i === 0) items = items.filter(function (x) { return !sentAt(sentKey(x.g, 0)) || sentAt(sentKey(x.g, 0)) >= today().getTime(); }); // 예전에 보낸 확정 문자는 목록에서 뺌
       if (!items.length) return;
-      var left = items.filter(function (x) { return !sent[sentKey(x.g, G.i)]; }).length;
+      var left = items.filter(function (x) { return !sentAt(sentKey(x.g, G.i)); }).length;
       todo += left; done += items.length - left;
       var chip = document.createElement('span'); chip.className = 'chip' + (left ? '' : ' done');
       chip.textContent = G.t + ' ' + items.length + (left < items.length ? ' (남음 ' + left + ')' : '');
       sum.appendChild(chip);
-      var h = document.createElement('h3'); h.className = 'grp'; h.textContent = G.t; box.appendChild(h);
+      if (!box.firstChild) {
+        var top = document.createElement('div'); top.className = 'picks';
+        top.innerHTML = '<span class="lbl">보낼 문자를 체크하세요</span>';
+        [['전체 선택', 0], ['전체 해제', 1]].forEach(function (o) {
+          var b = document.createElement('button'); b.type = 'button'; b.className = 'btn ghost sm'; b.textContent = o[0];
+          b.addEventListener('click', function () { QROWS.forEach(function (r) { if (r.sent) return; if (o[1]) unpicked[r.k] = 1; else delete unpicked[r.k]; }); renderList(); });
+          top.appendChild(b);
+        });
+        box.appendChild(top);
+      }
+      var hd = document.createElement('div'); hd.className = 'grp-head';
+      var h = document.createElement('h3'); h.className = 'grp'; h.textContent = G.t; hd.appendChild(h);
+      var keys = items.filter(function (x) { return !sentAt(sentKey(x.g, G.i)); }).map(function (x) { return sentKey(x.g, G.i); });
+      if (keys.length) {
+        var pk = document.createElement('span'); pk.className = 'picks';
+        [['모두 선택', 0], ['모두 해제', 1]].forEach(function (o) {
+          var b = document.createElement('button'); b.type = 'button'; b.className = 'link'; b.textContent = o[0];
+          b.addEventListener('click', function () { keys.forEach(function (k) { if (o[1]) unpicked[k] = 1; else delete unpicked[k]; }); renderList(); });
+          pk.appendChild(b);
+        });
+        hd.appendChild(pk);
+      }
+      box.appendChild(hd);
       items.sort(function (a, b) { return a.ciD - b.ciD; }).forEach(function (x) { box.appendChild(row(x.g, x.ciD, G.i)); });
     });
     if (staying) { var c = document.createElement('span'); c.className = 'chip quiet'; c.textContent = '머무는 중 ' + staying; sum.appendChild(c); }
     if (!todo && !done) { var p = document.createElement('p'); p.className = 'note'; p.textContent = '오늘 보낼 레터가 없어요. 예약 손님 ' + guests.length + '명을 확인했어요.'; box.appendChild(p); }
+    bulkUi();
     var when = listAt ? new Date(listAt) : null;
     $('today-meta').textContent = '예약 손님 ' + guests.length + '명' + (skipped ? (listSrc === 'cal' ? ' · 전화번호가 없는 일정 ' : ' · 예약 형식이 아닌 연락처 ') + skipped + '개 제외' : '') + (when ? ' · ' + (listSrc === 'cal' ? '캘린더 ' : '') + (when.getMonth() + 1) + '/' + when.getDate() + ' ' + pad(when.getHours()) + ':' + pad(when.getMinutes()) + ' 불러옴' : '');
   }
   function row(g, ciD, idx) {
-    var k = sentKey(g, idx), isSent = !!sent[k], l = g.lang;
+    var k = sentKey(g, idx), isSent = !!sentAt(k), l = g.lang;
     var text = buildText(l, idx, g.name, ciD, g.n);
     var el = document.createElement('div'); el.className = 'grow' + (isSent ? ' sent' : '');
-    el.innerHTML = '<div class="gmain"><b class="gname"></b><span class="gmeta"></span></div>' +
-      '<div class="gact"><button type="button" class="btn ghost sm gopen">자세히</button><a class="btn primary sm gsend"></a></div>';
+    el.innerHTML = '<label class="gpick"><input type="checkbox" class="gchk"><span class="gmain"><b class="gname"></b><span class="gmeta"></span></span></label>' +
+      '<div class="gact"><button type="button" class="btn ghost sm gopen" title="문구 보기·고치기">보기</button><a class="btn primary sm gsend"></a></div>';
     el.querySelector('.gname').textContent = g.name;
-    el.querySelector('.gmeta').textContent = (g.room ? g.room + '번룸 · ' : '') + fmt(ciD, 'ko') + ' · ' + g.n + '박 · ' + g.to + (l !== 'ko' ? ' · ' + LANG_NAME[l] : '');
+    el.querySelector('.gmeta').textContent = (g.room ? g.room + '번 ' : '') + (ciD.getMonth() + 1) + '/' + ciD.getDate() + '(' + '일월화수목금토'[ciD.getDay()] + ') ' + g.n + '박' + (l !== 'ko' ? ' · ' + { en: 'EN', zh: '中', ja: '日' }[l] : '');
+    el.title = g.name + ' · ' + g.to;
+    // 같은 방 · 겹치는 날 예약이 있으면 줄에도 ⚠ 표시
+    var gco = iso(addDays(ciD, g.n)), clashes = roomClash(g.room, g.ci, gco).filter(function (b) { return !(b.ci === g.ci && b.to.replace(/\D/g, '') === g.to.replace(/\D/g, '')); });
+    if (clashes.length) {
+      el.classList.add('clash');
+      var gm = el.querySelector('.gmeta'); gm.textContent = '⚠ ' + gm.textContent + ' · 방 겹침(' + clashes.map(function (b) { return b.name; }).join(', ') + ')';
+      el.title += ' · ' + g.room + '번 방이 ' + clashes.map(function (b) { return b.name + ' ' + stayTxt(b); }).join(', ') + '와 겹쳐요';
+    }
+    var ck = el.querySelector('.gchk');
+    ck.checked = !isSent && !unpicked[k]; ck.disabled = isSent;
+    ck.setAttribute('aria-label', g.name + ' 선택');
+    ck.addEventListener('change', function () { if (this.checked) delete unpicked[k]; else unpicked[k] = 1; renderList(); });
+    el.dataset.k = k;
+    QROWS.push({ k: k, name: g.name, href: smsHref(g.to, text), sent: isSent, picked: ck.checked });
     var a = el.querySelector('.gsend');
     a.href = smsHref(g.to, text);
-    a.textContent = isSent ? '보냄 ✓' : '문자 보내기';
+    a.textContent = isSent ? '보냄 ✓' : '문자';
     a.addEventListener('click', function (e) {
-      if (sent[k]) { e.preventDefault(); markSent(k, false); renderList(); return; }
+      if (sentAt(k)) { e.preventDefault(); markSent(k, false); renderList(); return; }
       markSent(k, true); setTimeout(renderList, 300);
     });
     el.querySelector('.gopen').addEventListener('click', function () { loadOne(g.raw); $('h-guest').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
@@ -702,28 +808,98 @@ h2 .q { margin-right: 8px; }
     if (cal) $('help-cal').open = true;
   }
   function loadCal(quiet) {
-    if (!cal || !cal.u) return;
+    if (!cal || !cal.u) return Promise.resolve(false);
     calAt = Date.now();
     if (!quiet) $('today-meta').textContent = '캘린더에서 불러오는 중…';
-    fetch(cal.u + '?k=' + encodeURIComponent(cal.k), { cache: 'no-store' })
+    return fetch(cal.u + '?k=' + encodeURIComponent(cal.k), { cache: 'no-store' })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (!d || !d.ok) {
           flash(d && d.error === 'calendar' ? '"비로소 예약" 캘린더를 찾지 못했어요. 캘린더 이름을 확인해 주세요.' : '캘린더 연결 키가 맞지 않아요. 사장님께 새 설정 링크를 받아 주세요.');
-          renderList(); return;
+          renderList(); return false;
         }
         var evs = d.events || [], seen = {}, out = [], skipped = 0;
+        setBookings(evs);
         evs.forEach(function (ev) {
           var g = calToGuest(ev); if (!g) { skipped++; return; }
-          var k = g.to + g.ci; if (seen[k]) return; seen[k] = 1; out.push(g);
+          var k = g.to + g.ci + '|' + g.name; if (seen[k]) return; seen[k] = 1; out.push(g);
         });
         guests = out; listAt = Date.now(); listSrc = 'cal';
         store('guestList', guests); store('guestListAt', listAt); store('guestListSrc', listSrc);
         renderList('캘린더', evs.length, skipped);
+        return true;
       })
-      .catch(function () { if (!quiet) flash('캘린더를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'); renderList(); });
+      .catch(function () { if (!quiet) flash('캘린더를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'); renderList(); return false; });
   }
+  // ── 방 겹침 확인: 같은 방 · 겹치는 밤 ─────────────────────
+  // 캘린더 일정 제목 맨 앞 숫자 = 방번호. 체크인 ~ 체크아웃(제외)이 겹치면 같은 방 중복
+  var bookings = store('calBookings') || [];
+  function setBookings(evs) {
+    bookings = [];
+    evs.forEach(function (ev) {
+      var r = parseContact(ev.t || ''), ci = parse(ev.ci), co = parse(ev.end);
+      if (!r.room || !ci || !co || co <= ci) return;
+      bookings.push({ room: r.room, ci: ev.ci, co: ev.end, name: r.name || (ev.t || '').trim(), to: r.to || '', id: String(ev.id || '').replace(/@google\.com$/, '') });
+    });
+    store('calBookings', bookings);
+  }
+  function roomClash(room, ci, co) { // ci·co: 'YYYY-MM-DD'
+    if (!room || !ci || !co) return [];
+    return bookings.filter(function (b) { return b.room === +room && b.ci < co && ci < b.co; });
+  }
+  function md2(isoS) { var x = parse(isoS); return fmt(x, 'ko'); }
+  function stayShort(b) { var a = parse(b.ci), l = addDays(parse(b.co), -1), f = function (x) { return (x.getMonth() + 1) + '/' + x.getDate() + '(' + '일월화수목금토'[x.getDay()] + ')'; }; return b.ci === iso(l) ? f(a) : f(a) + '~' + f(l); }
+  function stayTxt(b) { var last = iso(addDays(parse(b.co), -1)); return b.ci === last ? md2(b.ci) : md2(b.ci) + '~' + md2(last); }
+  function clashPairs() {
+    var now = iso(today()), list = bookings.filter(function (b) { return b.co > now; }).sort(function (a, b) { return a.ci < b.ci ? -1 : 1; }), out = [];
+    for (var i = 0; i < list.length; i++) for (var j = i + 1; j < list.length; j++) {
+      var a = list[i], b = list[j];
+      if (a.room === b.room && a.ci < b.co && b.ci < a.co) out.push([a, b]);
+    }
+    return out;
+  }
+  // 구글 캘린더에서 그 예약 열기: 일정 ID가 있으면 그 일정 화면, 없으면(예전 Apps Script) 그 날짜 화면
+  var BOOK_CAL = '01e84fd438322663f186fa43a9e25ede388201e64d53b874420845f56365e7fb@group.calendar.google.com';
+  // 안드로이드: 구글 캘린더 '앱'으로 엶 (앱이 없으면 웹으로). 아이폰·컴퓨터: 웹
+  var ANDROID_CAL = /Android/i.test(navigator.userAgent);
+  function calWeb(b) {
+    var acct = ''; try { acct = localStorage.getItem('bookAcct') || ''; } catch (e) {}
+    var au = acct ? 'authuser=' + encodeURIComponent(acct) : '';
+    if (b.id) {
+      var eid = btoa(unescape(encodeURIComponent(b.id + ' ' + BOOK_CAL))).replace(/=+$/, '');
+      return 'https://calendar.google.com/calendar/event?eid=' + encodeURIComponent(eid) + (au ? '&' + au : '');
+    }
+    var p = b.ci.split('-');
+    return 'https://calendar.google.com/calendar/r/day/' + p[0] + '/' + (+p[1]) + '/' + (+p[2]) + (au ? '?' + au : '');
+  }
+  function calLink(b) {
+    var web = calWeb(b);
+    if (!ANDROID_CAL) return web;
+    var tail = ';package=com.google.android.calendar;S.browser_fallback_url=' + encodeURIComponent(web) + ';end';
+    if (b.id) return 'intent://' + web.replace(/^https:\/\//, '') + '#Intent;scheme=https;action=android.intent.action.VIEW' + tail; // 그 예약 화면
+    var p = b.ci.split('-'), t = new Date(+p[0], p[1] - 1, +p[2], 12).getTime();
+    return 'intent://com.android.calendar/time/' + t + '#Intent;scheme=content;action=android.intent.action.VIEW' + tail; // 그 날짜 화면
+  }
+  function renderWarn() {
+    var box = $('today-warn'), pairs = clashPairs();
+    box.hidden = !pairs.length; if (!pairs.length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<b>⚠ 같은 방에 예약이 겹쳐요 (' + pairs.length + '건)</b>';
+    pairs.forEach(function (p) {
+      var d = document.createElement('div'); d.className = 'wline';
+      var rm = document.createElement('span'); rm.className = 'wroom'; rm.textContent = p[0].room + '번룸이 겹쳐요'; d.appendChild(rm);
+      [p[0], p[1]].forEach(function (b, i) {
+        var a = document.createElement('a'); a.className = 'wlink'; a.href = calLink(b);
+        a.textContent = b.name + ' ' + stayShort(b); a.title = '구글 캘린더에서 ' + b.name + ' 예약 열기';
+        d.appendChild(a);
+      });
+      box.appendChild(d);
+    });
+    var n = document.createElement('div'); n.style.marginTop = '4px'; n.textContent = '예약을 누르면 구글 캘린더 앱에서 열려요. 한쪽 일정 제목의 방번호(맨 앞 숫자)를 고쳐 주세요.'; box.appendChild(n);
+  }
+  window.biroso = { calLink: calLink, roomClash: roomClash, stayTxt: stayTxt, reloadCal: function () { return loadCal(true); }, linked: function () { return !!cal; } };
   $('btn-cal').addEventListener('click', function () { loadCal(); });
+  $('btn-bulk').addEventListener('click', bulkNext);
+  $('btn-bulk-stop').addEventListener('click', function () { queue = null; renderList(); flash('일괄 보내기를 멈췄어요. 보낸 문자는 ✓로 표시돼 있어요.'); });
   $('btn-cal-off').addEventListener('click', function () { cal = null; store('calSrc', null); calUi(); flash('캘린더 연결을 해제했어요.'); });
 
   // 설정 링크 → { u: 웹 앱 주소, k: 키 }. 앞뒤 글자·줄바꿈·인코딩(%7C 등)이 섞여 있어도 찾아냄
@@ -820,9 +996,10 @@ h2 .q { margin-right: 8px; }
       chip(s.n + '박'); chip('막대 ' + s.n + '칸 · ' + md(s.ci) + (s.n > 1 ? '~' + md(last) : ''));
     }
     if (s.room) chip(s.room + '번룸');
+    var cl = clash(s); if (cl.length) { chip('⚠ 방 겹침: ' + clashTxt(cl), true); sum.lastChild.className = 'chip danger'; }
     $('b-msg').textContent = s.err && (s.name || s.to || s.ci || s.co) ? s.err : '';
     var go = $('b-go'); if (s.err) { go.removeAttribute('href'); go.classList.add('off'); go.setAttribute('aria-disabled', 'true'); } else { go.href = ANDROID ? appUrl(s) : url(s); go.classList.remove('off'); go.removeAttribute('aria-disabled'); }
-    var direct = mode(), web = $('b-web'); web.hidden = !ANDROID || !!s.err || direct; if (!s.err) web.href = url(s);
+    mode(); $('b-web').hidden = true; // 웹으로 열기는 쓰지 않음 (작게 보임) — 앱이 없을 때만 자동으로 웹
   }
   function url(s) {
     var title = (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : '');
@@ -847,12 +1024,15 @@ h2 .q { margin-right: 8px; }
       'S.title=' + e(title) + ';S.description=' + e(details) + ';l.beginTime=' + b + ';l.endTime=' + f +
       ';B.allDay=true;S.browser_fallback_url=' + e(url(s)) + ';end';
   }
+  // 방 겹침: 오늘의 레터가 캘린더에서 불러 둔 예약과 비교 (같은 방 · 겹치는 밤)
+  function clash(s) { var B = window.biroso; return B && s.room && s.ci && s.co && s.n >= 1 ? B.roomClash(s.room, isoD(s.ci), isoD(s.co)) : []; }
+  function clashTxt(cl) { return cl.map(function (b) { return b.room + '번룸 ' + b.name + ' ' + window.biroso.stayTxt(b); }).join(', '); }
   // 바로 저장: 캘린더 연결(설정 링크)이 된 휴대폰이면 Apps Script로 바로 저장. 아니면 예전처럼 캘린더 화면 열기
   function link() { try { var c = JSON.parse(localStorage.getItem('calSrc') || 'null'); return c && c.u && c.k ? c : null; } catch (e) { return null; } }
   var busy = false, last = null, undoT = 0;
   function title(s) { return (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : ''); }
   function details(s) { var memo = $('b-memo').value.trim(); return '체크인 ' + ko(s.ci) + ' · 체크아웃 ' + ko(s.co) + ' · ' + s.n + '박' + (memo ? '\n' + memo : ''); }
-  function stat(t, warn) { var el = $('b-stat'); el.textContent = t || ''; el.hidden = !t; el.style.color = warn ? 'var(--warn)' : ''; }
+  function stat(t, warn) { var el = $('b-stat'); el.textContent = t || ''; el.hidden = !t; el.style.color = warn === 'danger' ? 'var(--danger)' : warn ? 'var(--warn)' : ''; el.style.fontWeight = warn === 'danger' ? '700' : ''; }
   function post(c, body) { return fetch(c.u, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
   var FIELDS = ['b-room', 'b-lang', 'b-name', 'b-to', 'b-in', 'b-out', 'b-memo'];
   function snap() { var o = {}; FIELDS.forEach(function (id) { o[id] = $(id).value; }); return o; }
@@ -866,7 +1046,7 @@ h2 .q { margin-right: 8px; }
       go.textContent = ANDROID ? '캘린더 앱으로 넣기' : '캘린더 화면으로 넣기';
       if (ANDROID) go.removeAttribute('target'); else go.setAttribute('target', '_blank');
       web.hidden = true;
-      $('b-note').innerHTML = '<b>바로 저장</b>을 누르면 저장 화면 없이 <b>비로소 예약</b>에 바로 들어가요. 막대는 <b>박 수만큼</b>, 같은 예약이 이미 있으면 알려 드려요. 잘못 넣었으면 20초 안에 <b>되돌리기</b>.';
+      $('b-note').innerHTML = '<b>바로 저장</b>을 누르면 저장 화면 없이 <b>비로소 예약</b>에 바로 들어가요. 막대는 <b>박 수만큼</b>, 같은 예약이 이미 있으면 알려 드려요. 잘못 넣었으면 1분 30초 안에 <b>되돌리기</b>.';
       return direct;
     }
     if (ANDROID) {
@@ -885,26 +1065,38 @@ h2 .q { margin-right: 8px; }
   }
   function save(force) {
     var c = link(), s = state(); if (!c || busy || s.err) return;
-    busy = true; $('b-direct').textContent = '저장 중…'; $('b-force').hidden = true; stat('');
+    busy = true; $('b-direct').textContent = force ? '저장 중…' : '방 확인 중…'; $('b-force').hidden = true; $('b-open').hidden = true; stat('');
     var keep = snap();
-    post(c, { k: c.k, a: 'add', title: title(s), ci: isoD(s.ci), co: isoD(s.co), to: s.to, memo: details(s), force: !!force })
+    var check = force || !s.room || !window.biroso ? Promise.resolve() : window.biroso.reloadCal().catch(function () {});
+    check.then(function () {
+      if (!force) {
+        var cl = clash(s);
+        if (cl.length) { busy = false; mode(); render(); $('b-force').hidden = false; $('b-force').dataset.why = 'room'; stat('⚠ 예약 방이 겹쳐요: ' + clashTxt(cl) + '. 방을 바꾸거나, 맞으면 「그래도 저장」을 누르세요.', 'danger'); return; }
+      }
+      $('b-direct').textContent = '저장 중…';
+      return post(c, { k: c.k, a: 'add', title: title(s), ci: isoD(s.ci), co: isoD(s.co), to: s.to, memo: details(s), force: force === 'dup' })
       .then(function (d) {
         if (d && d.ok) {
           busy = false; last = { id: d.id, keep: keep };
           FIELDS.forEach(function (id) { $(id).value = ''; }); render();
           var lastNight = new Date(s.co.getTime() - 864e5);
           stat('저장됨 ✓ ' + d.t + ' · ' + md(s.ci) + (s.n > 1 ? '~' + md(lastNight) : '') + ' ' + s.n + '박');
-          $('b-undo').hidden = false; clearTimeout(undoT);
-          undoT = setTimeout(function () { $('b-undo').hidden = true; last = null; }, 20000);
+          if (window.biroso) { var ob = $('b-open'); ob.href = window.biroso.calLink({ id: String(d.id || '').replace(/@google\.com$/, ''), ci: isoD(s.ci) }); ob.hidden = false; }
+          $('b-undo').hidden = false; clearInterval(undoT);
+          var left = 90; // 되돌리기: 1분 30초 (버튼에 남은 시간 표시)
+          var tick = function () { var b = $('b-undo'); if (!b.disabled) b.textContent = '되돌리기 ' + Math.floor(left / 60) + ':' + pad(left % 60); };
+          tick();
+          undoT = setInterval(function () { left--; if (left <= 0 || !last) { clearInterval(undoT); $('b-undo').hidden = true; $('b-undo').textContent = '되돌리기'; last = null; return; } tick(); }, 1000);
           window.dispatchEvent(new Event('biroso:calchanged'));
           return;
         }
-        if (d && d.error === 'dup') { busy = false; mode(); $('b-force').hidden = false; stat('이미 같은 예약이 있어요: ' + d.t + '. 다른 예약이면 「그래도 저장」을 누르세요.', true); return; }
+        if (d && d.error === 'dup') { busy = false; mode(); $('b-force').hidden = false; $('b-force').dataset.why = 'dup'; stat('이미 같은 예약이 있어요: ' + d.t + '. 다른 예약이면 「그래도 저장」을 누르세요.', true); return; }
         fail(d && d.error === 'key' ? '캘린더 연결 키가 바뀌어 저장하지 못했어요. 새 설정 링크를 이 휴대폰에서 한 번 열어 주세요. 지금은' : d && d.error === 'calendar' ? '"비로소 예약" 캘린더를 찾지 못했어요.' : '저장하지 못했어요.');
       })
       .catch(function () { fail('저장하지 못했어요(인터넷 연결 또는 캘린더 설정 확인).'); });
+    });
   }
-  $('b-force').addEventListener('click', function () { save(true); });
+  $('b-force').addEventListener('click', function () { save(this.dataset.why || 'room'); }); // room: 방 겹침만 넘김 · dup: 같은 예약도 넘김
   $('b-direct').addEventListener('click', function () {
     var s = state();
     if (s.err) { $('b-msg').textContent = s.err; return; }
@@ -918,7 +1110,7 @@ h2 .q { margin-right: 8px; }
       .then(function (d) {
         busy = false; $('b-undo').disabled = false;
         if (d && d.ok) {
-          clearTimeout(undoT); $('b-undo').hidden = true; last = null;
+          clearInterval(undoT); $('b-undo').hidden = true; $('b-undo').textContent = '되돌리기'; last = null; $('b-open').hidden = true;
           FIELDS.forEach(function (id) { $(id).value = l.keep[id]; }); render();
           stat('되돌렸어요. 고쳐서 다시 저장하세요.');
           window.dispatchEvent(new Event('biroso:calchanged'));
@@ -936,6 +1128,8 @@ h2 .q { margin-right: 8px; }
       var first = !s.name ? 'b-name' : !s.to ? 'b-to' : !s.ci ? 'b-in' : 'b-out'; try { $(first).focus(); } catch (x) {}
       return;
     }
+    var cl = clash(s);
+    if (cl.length && !confirm('예약 방이 겹쳐요: ' + clashTxt(cl) + '\n그래도 넣을까요?')) { e.preventDefault(); return; }
     this.href = ANDROID ? appUrl(s) : url(s); // 링크로 바로 이동 (팝업 차단에 막히지 않게)
   });
   $('b-clear').addEventListener('click', function () { ['b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).value = ''; }); $('b-room').value = ''; $('b-lang').value = ''; render(); });
@@ -952,7 +1146,7 @@ h2 .q { margin-right: 8px; }
 /* ? 설명 팝업: 칸마다 입력 방법·뜻. 자세한 내용은 manual.html (설명서) */
 (function () {
   var T = {
-    book: ['예약 넣기', '<p>예약을 받으면 여기에 적고 <b>구글 캘린더 앱에 넣기</b>(아이폰은 <b>구글 캘린더에 넣기</b>)를 누르세요. 새 일정 화면이 다 채워져 열리고, <b>저장</b>만 누르면 끝이에요.</p><ul><li>캘린더가 연결된 휴대폰(설정 링크를 연 휴대폰)은 큰 버튼이 <b>바로 저장</b>이에요. 저장 화면 없이 바로 들어가요 (중복 알림 · 20초 되돌리기)</li><li>캘린더: 웹은 <b>비로소 예약</b>으로 자동 선택, 앱은 위쪽 칩에서 <b>비로소 예약</b>을 직접 눌러 주세요</li><li>막대는 <b>박 수만큼</b> (1박 = 하루, 2박 = 이틀)</li><li>제목은 <code>2 홍길동 010-1234-5678</code> 모양으로 자동</li></ul>'],
+    book: ['예약 넣기', '<p>예약을 받으면 여기에 적고 <b>구글 캘린더 앱에 넣기</b>(아이폰은 <b>구글 캘린더에 넣기</b>)를 누르세요. 새 일정 화면이 다 채워져 열리고, <b>저장</b>만 누르면 끝이에요.</p><ul><li>캘린더가 연결된 휴대폰(설정 링크를 연 휴대폰)은 큰 버튼이 <b>바로 저장</b>이에요. 저장 화면 없이 바로 들어가요 (중복 알림 · 1분 30초 되돌리기)</li><li>캘린더: 웹은 <b>비로소 예약</b>으로 자동 선택, 앱은 위쪽 칩에서 <b>비로소 예약</b>을 직접 눌러 주세요</li><li>막대는 <b>박 수만큼</b> (1박 = 하루, 2박 = 이틀)</li><li>제목은 <code>2 홍길동 010-1234-5678</code> 모양으로 자동</li></ul>'],
     room: ['방', '<p>손님이 묵을 방. 정해지지 않았으면 <b>미정</b>. 고른 방번호가 캘린더 제목 맨 앞에 들어가 달력에서 한눈에 보여요.</p><ul><li><b>1·2번룸</b> 3인 · 싱글+퀸 (1번 1층, 2번 그 위 2층)</li><li><b>3·4번룸</b> 2인 · 퀸 (3번 2층, 4번 그 아래 1층)</li><li><b>5·6번룸</b> 2인 · 슈퍼싱글 2개 (1층 나란히)</li></ul>'],
     lang: ['문자 언어', '<p>외국 손님이면 <b>English · 中文 · 日本語</b> 중 하나. 제목 끝에 <code>EN</code> <code>中</code> <code>日</code>이 붙고, 오늘의 레터가 그 언어로 문자를 만들어요. 한국 손님은 그대로 <b>한국어</b>.</p>'],
     name: ['손님 이름', '<p>예약자 이름. 문자 첫머리 "OOO님"에 들어가요.</p><ul><li>같은 날 같은 이름이 두 분이면 <code>홍길동 1</code>, <code>홍길동 2</code></li><li>박 수 · 인원 · 재방 같은 표시는 이름에 넣지 말고 <b>메모</b>에</li></ul>'],
@@ -961,7 +1155,7 @@ h2 .q { margin-right: 8px; }
     out: ['체크아웃', '<p>손님이 <b>떠나는 날</b>. 박 수 = 체크아웃 − 체크인.</p><ul><li>캘린더 막대는 체크인 날부터 <b>마지막 밤</b>까지만 그려져요 (25일 체크인 · 27일 체크아웃 → 25·26일 이틀 = 2박)</li><li>체크아웃이 체크인과 같거나 빠르면 버튼이 눌리지 않아요</li></ul>'],
     memo: ['메모', '<p>베드 · 인원 · 요청 사항을 자유롭게. 캘린더 일정의 <b>설명</b>에 들어가고 문자에는 들어가지 않아요.</p><p>예: <code>퀸 / 2인 / 재방 / 현금영수증 010-…</code></p>'],
     acct: ['계정 (여러 개일 때)', '<p>이 휴대폰·컴퓨터에 구글 계정이 여러 개라 다른 계정 캘린더가 열릴 때만 적어요. <b>비로소 예약</b>을 공유받은 계정 이메일을 한 번 적어 두면 이 기기에 기억돼요.</p>'],
-    today: ['오늘의 레터', '<p>예약 목록을 불러와 <b>오늘 보낼 문자</b>를 순서대로 보여 줘요: 오늘 체크아웃 → 오늘 체크인 → 예약 확정.</p><ul><li><b>캘린더 새로 불러오기</b>: 비로소 예약 캘린더에서 다시 받아오기</li><li><b>문자 보내기</b>를 누르면 문자 앱이 열려요. 확인 후 보내면 \'보냄 ✓\'로 바뀌어요</li><li><b>자세히</b>: 아래 손님 정보로 불러와 문구를 보거나 고치기</li></ul>'],
+    today: ['오늘의 레터', '<p>예약 목록을 불러와 <b>오늘 보낼 문자</b>를 순서대로 보여 줘요: 예약 확정 → 오늘 체크인 → 오늘 체크아웃.</p><ul><li>줄마다 <b>체크박스</b>. 전체 선택 · 전체 해제, 묶음마다 모두 선택 · 모두 해제</li><li><b>체크한 N건 일괄 보내기</b>: 한 건씩 문자 앱이 채워져 열려요. 보내기를 누르고 돌아오면 다음 손님이 준비돼요 (휴대폰 보안상 문자 앱의 보내기는 건마다 눌러야 해요)</li><li>한 분만 보낼 땐 줄의 <b>문자</b>, 문구를 보거나 고칠 땐 <b>보기</b></li><li>같은 방에 예약이 겹치면 맨 위에 <b>⚠ 경고</b>가 떠요</li><li><b>캘린더 새로 불러오기</b>: 비로소 예약 캘린더에서 다시 받아오기</li></ul>'],
     import: ['레터 쓰기 · 한 분', '<p>한 분에게만 문자를 쓸 때. 연락처 이름과 번호를 붙여 넣으면 날짜 · 박 수 · 이름 · 번호가 아래 손님 정보에 채워져요.</p><p>예: <code>0325 2박 홍길동 010-1234-5678</code></p>'],
     guest: ['손님 정보', '<p>문자에 들어갈 값을 직접 고치는 곳. 바꾸면 아래 문자 3종이 바로 바뀌어요. <b>숙소 연락처</b>는 비워 두면 문자에서 빠져요.</p>'],
     tpl: ['문자 3종', '<p><b>예약 확정</b> · <b>체크인 당일</b> · <b>체크아웃 안내</b>. 지금 보낼 차례인 문자에 표시가 붙어요.</p><ul><li>90바이트까지 단문, 넘으면 장문으로 보내져요</li><li>문자 앱이 안 열리면 <b>복사</b> 후 붙여 넣기</li></ul>']
