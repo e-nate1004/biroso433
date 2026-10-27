@@ -108,6 +108,12 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 .gchk { width: 20px; height: 20px; }
 .grow.clash { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-soft); }
 .grow.clash .gmeta { color: var(--danger); font-weight: 700; }
+.bstat { margin: 0; padding: 12px 14px; border-radius: 10px; font-size: 15px; font-weight: 700; line-height: 1.5; border: 2px solid var(--line); }
+.bstat.ok { border-color: var(--accent); background: var(--accent-soft); color: var(--fg); }
+.bstat.ok::before { content: '✓ '; color: var(--accent); }
+.bstat.warn { border-color: var(--warn); color: var(--warn); }
+.bstat.danger { border-color: var(--danger); background: var(--danger-soft); color: var(--danger); }
+.bstat.busy { color: var(--muted); font-weight: 600; }
 .chip.danger { background: var(--danger-soft); border: 2px solid var(--danger); color: var(--danger); font-weight: 700; }
 .picks { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .picks .lbl { font-size: 13px; color: var(--muted); margin-right: auto; }
@@ -241,12 +247,12 @@ h2 .q { margin-right: 8px; }
         <div class="row">
           <button type="button" class="btn primary sm" id="b-direct" hidden>바로 저장</button>
           <a class="btn primary sm" id="b-go" role="button" target="_blank" rel="noopener">구글 캘린더에 넣기</a>
-          <button type="button" class="btn ghost sm" id="b-force" hidden>그래도 저장</button>
+          <button type="button" class="btn primary sm" id="b-force" hidden>그래도 저장</button>
           <button type="button" class="btn ghost sm" id="b-undo" hidden>되돌리기</button>
           <button type="button" class="btn ghost sm" id="b-clear">지우기</button>
           <a class="link" id="b-web" target="_blank" rel="noopener" hidden>앱 대신 웹으로 열기</a>
         </div>
-        <p class="note" id="b-stat" aria-live="polite" hidden></p>
+        <p class="bstat" id="b-stat" role="status" aria-live="polite" hidden></p>
         <a class="btn ghost sm" id="b-open" hidden>캘린더 앱에서 보기</a>
         <p class="note" id="b-note">열린 구글 캘린더 화면에서 확인 후 <b>저장</b>만 누르세요. 캘린더는 <b>비로소 예약</b>, 막대는 <b>박 수만큼</b> 맞춰져 있어요.</p>
       </div>
@@ -372,7 +378,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.18 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.19 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -1032,7 +1038,8 @@ h2 .q { margin-right: 8px; }
   var busy = false, last = null, undoT = 0;
   function title(s) { return (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : ''); }
   function details(s) { var memo = $('b-memo').value.trim(); return '체크인 ' + ko(s.ci) + ' · 체크아웃 ' + ko(s.co) + ' · ' + s.n + '박' + (memo ? '\n' + memo : ''); }
-  function stat(t, warn) { var el = $('b-stat'); el.textContent = t || ''; el.hidden = !t; el.style.color = warn === 'danger' ? 'var(--danger)' : warn ? 'var(--warn)' : ''; el.style.fontWeight = warn === 'danger' ? '700' : ''; }
+  // 결과 상자: ok 저장됨(초록) · warn 저장 안 됨(주황) · danger 방 겹침(빨강) · busy 진행 중
+  function stat(t, kind) { var el = $('b-stat'); el.textContent = t || ''; el.hidden = !t; el.className = 'bstat ' + (kind === true ? 'warn' : kind || 'busy'); if (t && kind) try { el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
   function post(c, body) { return fetch(c.u, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
   var FIELDS = ['b-room', 'b-lang', 'b-name', 'b-to', 'b-in', 'b-out', 'b-memo'];
   function snap() { var o = {}; FIELDS.forEach(function (id) { o[id] = $(id).value; }); return o; }
@@ -1065,13 +1072,13 @@ h2 .q { margin-right: 8px; }
   }
   function save(force) {
     var c = link(), s = state(); if (!c || busy || s.err) return;
-    busy = true; $('b-direct').textContent = force ? '저장 중…' : '방 확인 중…'; $('b-force').hidden = true; $('b-open').hidden = true; stat('');
+    busy = true; $('b-direct').textContent = force ? '저장 중…' : '방 확인 중…'; $('b-force').hidden = true; $('b-open').hidden = true; stat('캘린더에 저장하는 중…');
     var keep = snap();
     var check = force || !s.room || !window.biroso ? Promise.resolve() : window.biroso.reloadCal().catch(function () {});
     check.then(function () {
       if (!force) {
         var cl = clash(s);
-        if (cl.length) { busy = false; mode(); render(); $('b-force').hidden = false; $('b-force').dataset.why = 'room'; stat('⚠ 예약 방이 겹쳐요: ' + clashTxt(cl) + '. 방을 바꾸거나, 맞으면 「그래도 저장」을 누르세요.', 'danger'); return; }
+        if (cl.length) { busy = false; mode(); render(); $('b-force').hidden = false; $('b-force').dataset.why = 'room'; stat('⚠ 저장하지 않았어요. 예약 방이 겹쳐요: ' + clashTxt(cl) + '. 방을 바꾸거나, 맞으면 「그래도 저장」을 누르세요.', 'danger'); return; }
       }
       $('b-direct').textContent = '저장 중…';
       return post(c, { k: c.k, a: 'add', title: title(s), ci: isoD(s.ci), co: isoD(s.co), to: s.to, memo: details(s), force: force === 'dup' })
@@ -1080,7 +1087,7 @@ h2 .q { margin-right: 8px; }
           busy = false; last = { id: d.id, keep: keep };
           FIELDS.forEach(function (id) { $(id).value = ''; }); render();
           var lastNight = new Date(s.co.getTime() - 864e5);
-          stat('저장됨 ✓ ' + d.t + ' · ' + md(s.ci) + (s.n > 1 ? '~' + md(lastNight) : '') + ' ' + s.n + '박');
+          stat('저장됐어요 · ' + d.t + ' · ' + md(s.ci) + (s.n > 1 ? '~' + md(lastNight) : '') + ' ' + s.n + '박. 입력 칸을 비웠어요.', 'ok');
           if (window.biroso) { var ob = $('b-open'); ob.href = window.biroso.calLink({ id: String(d.id || '').replace(/@google\.com$/, ''), ci: isoD(s.ci) }); ob.hidden = false; }
           $('b-undo').hidden = false; clearInterval(undoT);
           var left = 90; // 되돌리기: 1분 30초 (버튼에 남은 시간 표시)
@@ -1090,7 +1097,7 @@ h2 .q { margin-right: 8px; }
           window.dispatchEvent(new Event('biroso:calchanged'));
           return;
         }
-        if (d && d.error === 'dup') { busy = false; mode(); $('b-force').hidden = false; $('b-force').dataset.why = 'dup'; stat('이미 같은 예약이 있어요: ' + d.t + '. 다른 예약이면 「그래도 저장」을 누르세요.', true); return; }
+        if (d && d.error === 'dup') { busy = false; mode(); $('b-force').hidden = false; $('b-force').dataset.why = 'dup'; stat('저장하지 않았어요. 같은 번호·같은 체크인 날짜 예약이 이미 있어요: ' + d.t + '. 다른 예약이면 「그래도 저장」을 누르세요.', true); return; }
         fail(d && d.error === 'key' ? '캘린더 연결 키가 바뀌어 저장하지 못했어요. 새 설정 링크를 이 휴대폰에서 한 번 열어 주세요. 지금은' : d && d.error === 'calendar' ? '"비로소 예약" 캘린더를 찾지 못했어요.' : '저장하지 못했어요.');
       })
       .catch(function () { fail('저장하지 못했어요(인터넷 연결 또는 캘린더 설정 확인).'); });
@@ -1112,7 +1119,7 @@ h2 .q { margin-right: 8px; }
         if (d && d.ok) {
           clearInterval(undoT); $('b-undo').hidden = true; $('b-undo').textContent = '되돌리기'; last = null; $('b-open').hidden = true;
           FIELDS.forEach(function (id) { $(id).value = l.keep[id]; }); render();
-          stat('되돌렸어요. 고쳐서 다시 저장하세요.');
+          stat('되돌렸어요(캘린더에서 지움). 내용을 다시 채워 뒀으니 고쳐서 저장하세요.', 'ok');
           window.dispatchEvent(new Event('biroso:calchanged'));
         } else stat(d && d.error === 'old' ? '저장한 지 15분이 지나 되돌릴 수 없어요. 구글 캘린더에서 지워 주세요.' : '되돌리지 못했어요. 구글 캘린더에서 직접 지워 주세요.', true);
       })
