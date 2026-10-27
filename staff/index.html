@@ -1101,14 +1101,14 @@ h2 .q { margin-right: 8px; }
     var c = link(), s = state(); if (!c || busy || s.err) return;
     busy = true; $('b-direct').textContent = force ? '저장 중…' : '방 확인 중…'; $('b-force').hidden = true; $('b-open').hidden = true; stat('캘린더에 저장하는 중…');
     var keep = snap();
-    var check = force || !window.biroso ? Promise.resolve() : window.biroso.reloadCal().catch(function () {});
+    // 만실(하루 6개)은 그래도 저장으로도 넣을 수 없음 (사장님 결정 10-27). 방 겹침만 「그래도 저장」 가능
+    var check = !window.biroso ? Promise.resolve() : window.biroso.reloadCal().catch(function () {});
     check.then(function () {
+      var fu = full(s);
+      if (fu.length) { busy = false; mode(); render(); $('b-force').hidden = true; stat('⚠ 저장할 수 없어요. ' + fullTxt(fu) + ' 만실이에요. 날짜를 바꿔 주세요.', 'danger'); return; }
       if (!force) {
         var cl = clash(s);
-        var fu = full(s), why = [];
-        if (cl.length) why.push('예약 방이 겹쳐요: ' + clashTxt(cl));
-        if (fu.length) why.push(fullTxt(fu) + ' 만실이에요');
-        if (why.length) { busy = false; mode(); render(); $('b-force').hidden = false; $('b-force').dataset.why = 'room'; stat('⚠ 저장하지 않았어요. ' + why.join(' / ') + '. 고치거나, 맞으면 「그래도 저장」을 누르세요.', 'danger'); return; }
+        if (cl.length) { busy = false; mode(); render(); $('b-force').hidden = false; $('b-force').dataset.why = 'room'; stat('⚠ 저장하지 않았어요. 예약 방이 겹쳐요: ' + clashTxt(cl) + '. 방을 바꾸거나, 맞으면 「그래도 저장」을 누르세요.', 'danger'); return; }
       }
       $('b-direct').textContent = '저장 중…';
       return post(c, { k: c.k, a: 'add', title: title(s), ci: isoD(s.ci), co: isoD(s.co), to: s.to, memo: details(s), force: true }) // 같은 번호·같은 체크인은 막지 않음 (사장님 결정 10-27). 방 겹침·하루 한도는 위에서 확인
@@ -1165,10 +1165,9 @@ h2 .q { margin-right: 8px; }
       var first = !s.name ? 'b-name' : !s.to ? 'b-to' : !s.ci ? 'b-in' : 'b-out'; try { $(first).focus(); } catch (x) {}
       return;
     }
-    var cl = clash(s), fu = full(s), msg = [];
-    if (cl.length) msg.push('예약 방이 겹쳐요: ' + clashTxt(cl));
-    if (fu.length) msg.push(fullTxt(fu) + ' 만실이에요');
-    if (msg.length && !confirm(msg.join('\n') + '\n그래도 넣을까요?')) { e.preventDefault(); return; }
+    var cl = clash(s), fu = full(s);
+    if (fu.length) { e.preventDefault(); stat('⚠ 넣을 수 없어요. ' + fullTxt(fu) + ' 만실이에요. 날짜를 바꿔 주세요.', 'danger'); return; }
+    if (cl.length && !confirm('예약 방이 겹쳐요: ' + clashTxt(cl) + '\n그래도 넣을까요?')) { e.preventDefault(); return; }
     this.href = ANDROID ? appUrl(s) : url(s); // 링크로 바로 이동 (팝업 차단에 막히지 않게)
   });
   $('b-clear').addEventListener('click', function () { ['b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).value = ''; }); $('b-room').value = ''; $('b-lang').value = ''; render(); });
