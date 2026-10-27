@@ -332,7 +332,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.14 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.15 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -818,13 +818,14 @@ h2 .q { margin-right: 8px; }
     return 'https://calendar.google.com/calendar/render?' + q;
   }
   // 안드로이드: 구글 캘린더 앱의 새 일정 화면으로 (앱이 없으면 웹으로).
-  // 종일 일정은 UTC 0시 기준, 끝은 체크아웃 날(제외)로 보내야 앱이 마지막 밤까지 그림 → 막대 = 박 수 (v4.14: 전엔 하루 짧았음)
+  // 종일 일정: 체크인 날 정오 ~ 마지막 밤(체크아웃 전날) 정오로 보냄 → 앱이 그 날짜를 그대로 시작·종료일로 씀 → 막대 = 박 수
+  // (v4.13: 마지막 밤 0시 → 하루 짧음 / v4.14: 체크아웃 날 UTC 0시 → 하루 김. 정오는 시간대·자정 처리와 무관하게 같은 날짜)
   var ANDROID = /Android/i.test(navigator.userAgent);
   function appUrl(s) {
     var title = (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : '');
     var memo = $('b-memo').value.trim();
     var details = '체크인 ' + ko(s.ci) + ' · 체크아웃 ' + ko(s.co) + ' · ' + s.n + '박' + (memo ? '\n' + memo : '');
-    var b = Date.UTC(s.ci.getFullYear(), s.ci.getMonth(), s.ci.getDate()), f = Date.UTC(s.co.getFullYear(), s.co.getMonth(), s.co.getDate());
+    var b = new Date(s.ci.getFullYear(), s.ci.getMonth(), s.ci.getDate(), 12).getTime(), f = new Date(s.co.getFullYear(), s.co.getMonth(), s.co.getDate() - 1, 12).getTime();
     function e(v) { return encodeURIComponent(v); }
     return 'intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;' +
       'S.title=' + e(title) + ';S.description=' + e(details) + ';l.beginTime=' + b + ';l.endTime=' + f +
