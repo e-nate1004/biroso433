@@ -378,7 +378,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.20 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.21 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -888,20 +888,16 @@ h2 .q { margin-right: 8px; }
   function calWeb(b) {
     var acct = ''; try { acct = localStorage.getItem('bookAcct') || ''; } catch (e) {}
     var au = acct ? 'authuser=' + encodeURIComponent(acct) : '';
-    if (b.id) {
-      var eid = btoa(unescape(encodeURIComponent(b.id + ' ' + BOOK_CAL))).replace(/=+$/, '');
-      return 'https://calendar.google.com/calendar/event?eid=' + encodeURIComponent(eid) + (au ? '&' + au : '');
-    }
     var p = b.ci.split('-');
-    return 'https://calendar.google.com/calendar/r/day/' + p[0] + '/' + (+p[1]) + '/' + (+p[2]) + (au ? '?' + au : '');
+    return 'https://calendar.google.com/calendar/r/month/' + p[0] + '/' + (+p[1]) + '/' + (+p[2]) + (au ? '?' + au : '');
   }
   function calLink(b) {
     var web = calWeb(b);
     if (!ANDROID_CAL) return web;
     var tail = ';package=com.google.android.calendar;S.browser_fallback_url=' + encodeURIComponent(web) + ';end';
-    if (b.id) return 'intent://' + web.replace(/^https:\/\//, '') + '#Intent;scheme=https;action=android.intent.action.VIEW' + tail; // 그 예약 화면
+    // 사장님 요청(10-27): 일정 상세 대신 그 날짜로 열어 월간 보기에서 앞뒤 예약까지 한눈에 (앱은 마지막으로 쓴 보기로 열림 → 앱에서 '월' 보기로 두기)
     var p = b.ci.split('-'), t = new Date(+p[0], p[1] - 1, +p[2], 12).getTime();
-    return 'intent://com.android.calendar/time/' + t + '#Intent;scheme=content;action=android.intent.action.VIEW' + tail; // 그 날짜 화면
+    return 'intent://com.android.calendar/time/' + t + '#Intent;scheme=content;action=android.intent.action.VIEW' + tail;
   }
   function renderWarn() {
     var box = $('today-warn'), pairs = clashPairs(), over = overNights();
