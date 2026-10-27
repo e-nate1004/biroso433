@@ -378,7 +378,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.19 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.20 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -840,8 +840,12 @@ h2 .q { margin-right: 8px; }
   // ── 방 겹침 확인: 같은 방 · 겹치는 밤 ─────────────────────
   // 캘린더 일정 제목 맨 앞 숫자 = 방번호. 체크인 ~ 체크아웃(제외)이 겹치면 같은 방 중복
   var bookings = store('calBookings') || [];
+  var stays = store('calStays') || []; // 방번호 없는 일정까지 모든 예약 (하루 한도 6개 계산용)
+  var CAP = 6;
   function setBookings(evs) {
-    bookings = [];
+    bookings = []; stays = [];
+    evs.forEach(function (ev) { if (ev.ci && ev.end && ev.end > ev.ci) stays.push({ ci: ev.ci, co: ev.end, name: (parseContact(ev.t || '').name || (ev.t || '').trim()), id: String(ev.id || '').replace(/@google\.com$/, '') }); });
+    store('calStays', stays);
     evs.forEach(function (ev) {
       var r = parseContact(ev.t || ''), ci = parse(ev.ci), co = parse(ev.end);
       if (!r.room || !ci || !co || co <= ci) return;
@@ -852,6 +856,19 @@ h2 .q { margin-right: 8px; }
   function roomClash(room, ci, co) { // ci·co: 'YYYY-MM-DD'
     if (!room || !ci || !co) return [];
     return bookings.filter(function (b) { return b.room === +room && b.ci < co && ci < b.co; });
+  }
+  // 하루 한도: ci~co(제외) 사이 밤마다 이미 있는 예약 수. 한도(6)에 이른 밤 목록
+  function nightCount(d) { return stays.filter(function (b) { return b.ci <= d && d < b.co; }).length; }
+  function fullNights(ci, co) {
+    var out = [], d = parse(ci), end = parse(co);
+    for (var i = 0; d < end && i < 31; i++, d = addDays(d, 1)) { var k = iso(d), n = nightCount(k); if (n >= CAP) out.push({ d: k, n: n }); }
+    return out;
+  }
+  function overNights() { // 앞으로 6개를 넘긴 밤
+    var now = iso(today()), seen = {}, out = [];
+    stays.forEach(function (b) { var d = parse(b.ci < now ? now : b.ci), end = parse(b.co);
+      for (var i = 0; d < end && i < 31; i++, d = addDays(d, 1)) { var k = iso(d); if (seen[k]) continue; seen[k] = 1; var n = nightCount(k); if (n > CAP) out.push({ d: k, n: n }); } });
+    return out.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
   }
   function md2(isoS) { var x = parse(isoS); return fmt(x, 'ko'); }
   function stayShort(b) { var a = parse(b.ci), l = addDays(parse(b.co), -1), f = function (x) { return (x.getMonth() + 1) + '/' + x.getDate() + '(' + '일월화수목금토'[x.getDay()] + ')'; }; return b.ci === iso(l) ? f(a) : f(a) + '~' + f(l); }
@@ -887,9 +904,16 @@ h2 .q { margin-right: 8px; }
     return 'intent://com.android.calendar/time/' + t + '#Intent;scheme=content;action=android.intent.action.VIEW' + tail; // 그 날짜 화면
   }
   function renderWarn() {
-    var box = $('today-warn'), pairs = clashPairs();
-    box.hidden = !pairs.length; if (!pairs.length) { box.innerHTML = ''; return; }
-    box.innerHTML = '<b>⚠ 같은 방에 예약이 겹쳐요 (' + pairs.length + '건)</b>';
+    var box = $('today-warn'), pairs = clashPairs(), over = overNights();
+    box.hidden = !pairs.length && !over.length; box.innerHTML = ''; if (box.hidden) return;
+    if (over.length) {
+      var ob = document.createElement('div'); ob.innerHTML = '<b>⚠ 만실을 넘긴 날이 있어요 (예약 ' + CAP + '개 초과)</b>';
+      var ol = document.createElement('div'); ol.className = 'wline';
+      over.forEach(function (o) { var a = document.createElement('a'); a.className = 'wlink'; a.href = calLink({ ci: o.d }); a.textContent = stayShort({ ci: o.d, co: iso(addDays(parse(o.d), 1)) }) + ' ' + o.n + '개'; ol.appendChild(a); });
+      ob.appendChild(ol); box.appendChild(ob);
+    }
+    if (!pairs.length) return;
+    var hb = document.createElement('b'); hb.textContent = '⚠ 같은 방에 예약이 겹쳐요 (' + pairs.length + '건)'; if (over.length) hb.style.marginTop = '10px'; box.appendChild(hb);
     pairs.forEach(function (p) {
       var d = document.createElement('div'); d.className = 'wline';
       var rm = document.createElement('span'); rm.className = 'wroom'; rm.textContent = p[0].room + '번룸이 겹쳐요'; d.appendChild(rm);
@@ -902,7 +926,7 @@ h2 .q { margin-right: 8px; }
     });
     var n = document.createElement('div'); n.style.marginTop = '4px'; n.textContent = '예약을 누르면 구글 캘린더 앱에서 열려요. 한쪽 일정 제목의 방번호(맨 앞 숫자)를 고쳐 주세요.'; box.appendChild(n);
   }
-  window.biroso = { calLink: calLink, roomClash: roomClash, stayTxt: stayTxt, reloadCal: function () { return loadCal(true); }, linked: function () { return !!cal; } };
+  window.biroso = { calLink: calLink, fullNights: fullNights, cap: CAP, roomClash: roomClash, stayTxt: stayTxt, reloadCal: function () { return loadCal(true); }, linked: function () { return !!cal; } };
   $('btn-cal').addEventListener('click', function () { loadCal(); });
   $('btn-bulk').addEventListener('click', bulkNext);
   $('btn-bulk-stop').addEventListener('click', function () { queue = null; renderList(); flash('일괄 보내기를 멈췄어요. 보낸 문자는 ✓로 표시돼 있어요.'); });
@@ -1003,6 +1027,7 @@ h2 .q { margin-right: 8px; }
     }
     if (s.room) chip(s.room + '번룸');
     var cl = clash(s); if (cl.length) { chip('⚠ 방 겹침: ' + clashTxt(cl), true); sum.lastChild.className = 'chip danger'; }
+    var fu = full(s); if (fu.length) { chip('⚠ ' + fullTxt(fu) + ' 만실이에요', true); sum.lastChild.className = 'chip danger'; }
     $('b-msg').textContent = s.err && (s.name || s.to || s.ci || s.co) ? s.err : '';
     var go = $('b-go'); if (s.err) { go.removeAttribute('href'); go.classList.add('off'); go.setAttribute('aria-disabled', 'true'); } else { go.href = ANDROID ? appUrl(s) : url(s); go.classList.remove('off'); go.removeAttribute('aria-disabled'); }
     mode(); $('b-web').hidden = true; // 웹으로 열기는 쓰지 않음 (작게 보임) — 앱이 없을 때만 자동으로 웹
@@ -1031,6 +1056,8 @@ h2 .q { margin-right: 8px; }
       ';B.allDay=true;S.browser_fallback_url=' + e(url(s)) + ';end';
   }
   // 방 겹침: 오늘의 레터가 캘린더에서 불러 둔 예약과 비교 (같은 방 · 겹치는 밤)
+  function full(s) { var B = window.biroso; return B && s.ci && s.co && s.n >= 1 ? B.fullNights(isoD(s.ci), isoD(s.co)) : []; }
+  function fullTxt(fu) { return fu.map(function (f) { var p = f.d.split('-'); return (+p[1]) + '/' + (+p[2]); }).join(', '); }
   function clash(s) { var B = window.biroso; return B && s.room && s.ci && s.co && s.n >= 1 ? B.roomClash(s.room, isoD(s.ci), isoD(s.co)) : []; }
   function clashTxt(cl) { return cl.map(function (b) { return b.room + '번룸 ' + b.name + ' ' + window.biroso.stayTxt(b); }).join(', '); }
   // 바로 저장: 캘린더 연결(설정 링크)이 된 휴대폰이면 Apps Script로 바로 저장. 아니면 예전처럼 캘린더 화면 열기
@@ -1053,7 +1080,7 @@ h2 .q { margin-right: 8px; }
       go.textContent = ANDROID ? '캘린더 앱으로 넣기' : '캘린더 화면으로 넣기';
       if (ANDROID) go.removeAttribute('target'); else go.setAttribute('target', '_blank');
       web.hidden = true;
-      $('b-note').innerHTML = '<b>바로 저장</b>을 누르면 저장 화면 없이 <b>비로소 예약</b>에 바로 들어가요. 막대는 <b>박 수만큼</b>, 같은 예약이 이미 있으면 알려 드려요. 잘못 넣었으면 1분 30초 안에 <b>되돌리기</b>.';
+      $('b-note').innerHTML = '<b>바로 저장</b>을 누르면 저장 화면 없이 <b>비로소 예약</b>에 바로 들어가요. 막대는 <b>박 수만큼</b>, 방이 겹치거나 만실이면 알려 드려요. 잘못 넣었으면 1분 30초 안에 <b>되돌리기</b>.';
       return direct;
     }
     if (ANDROID) {
@@ -1074,14 +1101,17 @@ h2 .q { margin-right: 8px; }
     var c = link(), s = state(); if (!c || busy || s.err) return;
     busy = true; $('b-direct').textContent = force ? '저장 중…' : '방 확인 중…'; $('b-force').hidden = true; $('b-open').hidden = true; stat('캘린더에 저장하는 중…');
     var keep = snap();
-    var check = force || !s.room || !window.biroso ? Promise.resolve() : window.biroso.reloadCal().catch(function () {});
+    var check = force || !window.biroso ? Promise.resolve() : window.biroso.reloadCal().catch(function () {});
     check.then(function () {
       if (!force) {
         var cl = clash(s);
-        if (cl.length) { busy = false; mode(); render(); $('b-force').hidden = false; $('b-force').dataset.why = 'room'; stat('⚠ 저장하지 않았어요. 예약 방이 겹쳐요: ' + clashTxt(cl) + '. 방을 바꾸거나, 맞으면 「그래도 저장」을 누르세요.', 'danger'); return; }
+        var fu = full(s), why = [];
+        if (cl.length) why.push('예약 방이 겹쳐요: ' + clashTxt(cl));
+        if (fu.length) why.push(fullTxt(fu) + ' 만실이에요');
+        if (why.length) { busy = false; mode(); render(); $('b-force').hidden = false; $('b-force').dataset.why = 'room'; stat('⚠ 저장하지 않았어요. ' + why.join(' / ') + '. 고치거나, 맞으면 「그래도 저장」을 누르세요.', 'danger'); return; }
       }
       $('b-direct').textContent = '저장 중…';
-      return post(c, { k: c.k, a: 'add', title: title(s), ci: isoD(s.ci), co: isoD(s.co), to: s.to, memo: details(s), force: force === 'dup' })
+      return post(c, { k: c.k, a: 'add', title: title(s), ci: isoD(s.ci), co: isoD(s.co), to: s.to, memo: details(s), force: true }) // 같은 번호·같은 체크인은 막지 않음 (사장님 결정 10-27). 방 겹침·하루 한도는 위에서 확인
       .then(function (d) {
         if (d && d.ok) {
           busy = false; last = { id: d.id, keep: keep };
@@ -1135,8 +1165,10 @@ h2 .q { margin-right: 8px; }
       var first = !s.name ? 'b-name' : !s.to ? 'b-to' : !s.ci ? 'b-in' : 'b-out'; try { $(first).focus(); } catch (x) {}
       return;
     }
-    var cl = clash(s);
-    if (cl.length && !confirm('예약 방이 겹쳐요: ' + clashTxt(cl) + '\n그래도 넣을까요?')) { e.preventDefault(); return; }
+    var cl = clash(s), fu = full(s), msg = [];
+    if (cl.length) msg.push('예약 방이 겹쳐요: ' + clashTxt(cl));
+    if (fu.length) msg.push(fullTxt(fu) + ' 만실이에요');
+    if (msg.length && !confirm(msg.join('\n') + '\n그래도 넣을까요?')) { e.preventDefault(); return; }
     this.href = ANDROID ? appUrl(s) : url(s); // 링크로 바로 이동 (팝업 차단에 막히지 않게)
   });
   $('b-clear').addEventListener('click', function () { ['b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).value = ''; }); $('b-room').value = ''; $('b-lang').value = ''; render(); });
