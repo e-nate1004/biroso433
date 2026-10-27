@@ -378,7 +378,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.21 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.22 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -826,6 +826,7 @@ h2 .q { margin-right: 8px; }
         }
         var evs = d.events || [], seen = {}, out = [], skipped = 0;
         setBookings(evs);
+        setTimeout(function () { window.dispatchEvent(new Event('biroso:bookings')); }, 0); // 예약 넣기의 방 겹침·만실 표시를 새 목록으로 다시 그림
         evs.forEach(function (ev) {
           var g = calToGuest(ev); if (!g) { skipped++; return; }
           var k = g.to + g.ci + '|' + g.name; if (seen[k]) return; seen[k] = 1; out.push(g);
@@ -1108,7 +1109,7 @@ h2 .q { margin-right: 8px; }
       return post(c, { k: c.k, a: 'add', title: title(s), ci: isoD(s.ci), co: isoD(s.co), to: s.to, memo: details(s), force: true }) // 같은 번호·같은 체크인은 막지 않음 (사장님 결정 10-27). 방 겹침·하루 한도는 위에서 확인
       .then(function (d) {
         if (d && d.ok) {
-          busy = false; last = { id: d.id, keep: keep };
+          busy = false; last = { id: d.id, keep: keep, t: d.t };
           FIELDS.forEach(function (id) { $(id).value = ''; }); render();
           var lastNight = new Date(s.co.getTime() - 864e5);
           stat('저장됐어요 · ' + d.t + ' · ' + md(s.ci) + (s.n > 1 ? '~' + md(lastNight) : '') + ' ' + s.n + '박. 입력 칸을 비웠어요.', 'ok');
@@ -1142,8 +1143,8 @@ h2 .q { margin-right: 8px; }
         busy = false; $('b-undo').disabled = false;
         if (d && d.ok) {
           clearInterval(undoT); $('b-undo').hidden = true; $('b-undo').textContent = '되돌리기'; last = null; $('b-open').hidden = true;
-          FIELDS.forEach(function (id) { $(id).value = l.keep[id]; }); render();
-          stat('되돌렸어요(캘린더에서 지움). 내용을 다시 채워 뒀으니 고쳐서 저장하세요.', 'ok');
+          FIELDS.forEach(function (id) { $(id).value = ''; }); render(); // 사장님 결정(10-27): 되돌리면 입력 칸도 비움
+          stat('되돌렸어요 · ' + l.t + ' 예약을 캘린더에서 지우고 입력 칸을 비웠어요.', 'ok');
           window.dispatchEvent(new Event('biroso:calchanged'));
         } else stat(d && d.error === 'old' ? '저장한 지 15분이 지나 되돌릴 수 없어요. 구글 캘린더에서 지워 주세요.' : '되돌리지 못했어요. 구글 캘린더에서 직접 지워 주세요.', true);
       })
@@ -1168,6 +1169,7 @@ h2 .q { margin-right: 8px; }
   // 페이지가 열린 채로 설정 링크를 열면(주소 # 만 바뀜) 연결 뒤 버튼을 바로 다시 그림
   window.addEventListener('hashchange', function () { setTimeout(render, 0); });
   window.addEventListener('biroso:callinked', function () { setTimeout(render, 0); });
+  window.addEventListener('biroso:bookings', function () { if (!busy) render(); });
   $('b-acct').value = get('bookAcct');
   $('b-acct').addEventListener('change', function () { put('bookAcct', this.value.trim()); });
   render();
