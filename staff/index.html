@@ -153,7 +153,6 @@ h2 .q { margin-right: 8px; }
 .tipbox a { color: var(--accent); font-size: 13.5px; }
 .sc { margin: 16px 0 8px; font-size: 15px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 </style>
-</head><body>
 <div class="wrap">
   <header>
     <span class="eyebrow">BIROSO 433 · LETTER</span>
@@ -202,9 +201,13 @@ h2 .q { margin-right: 8px; }
         <p class="note" id="b-msg"></p>
         <div class="row">
           <a class="btn primary sm" id="b-go" role="button" target="_blank" rel="noopener">구글 캘린더에 넣기</a>
+          <button type="button" class="btn ghost sm" id="b-direct" hidden>바로 저장</button>
+          <button type="button" class="btn ghost sm" id="b-force" hidden>그래도 저장</button>
+          <button type="button" class="btn ghost sm" id="b-undo" hidden>되돌리기</button>
           <button type="button" class="btn ghost sm" id="b-clear">지우기</button>
           <a class="link" id="b-web" target="_blank" rel="noopener" hidden>앱 대신 웹으로 열기</a>
         </div>
+        <p class="note" id="b-stat" aria-live="polite" hidden></p>
         <p class="note" id="b-note">열린 구글 캘린더 화면에서 확인 후 <b>저장</b>만 누르세요. 캘린더는 <b>비로소 예약</b>, 막대는 <b>박 수만큼</b> 맞춰져 있어요.</p>
       </div>
       <div class="field full"><button type="button" class="q" data-tip="acct" aria-label="계정 (여러 개일 때) 설명">?</button><label for="b-acct">계정 (여러 개일 때)</label><input id="b-acct" type="email" autocomplete="off" placeholder="비워 두면 기본 계정"></div>
@@ -329,7 +332,7 @@ h2 .q { margin-right: 8px; }
       </div>
     </div>
   </section>
-  <p class="ver">v4.11 · 2026-10-25 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
+  <p class="ver">v4.13 · 2026-10-27 · <a href="manual.html" target="_blank" rel="noopener">설명서</a></p>
 </div>
 <script>
 (function () {
@@ -762,6 +765,7 @@ h2 .q { margin-right: 8px; }
   readIncoming();
   if (cal && !calAt) loadCal(true);
   window.addEventListener('hashchange', readIncoming);
+  window.addEventListener('biroso:calchanged', function () { if (cal) loadCal(true); });
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) return;
     if (cal && Date.now() - calAt > 5 * 60 * 1000) loadCal(true); else renderList();
@@ -802,7 +806,7 @@ h2 .q { margin-right: 8px; }
     if (s.room) chip(s.room + '번룸');
     $('b-msg').textContent = s.err && (s.name || s.to || s.ci || s.co) ? s.err : '';
     var go = $('b-go'); if (s.err) { go.removeAttribute('href'); go.classList.add('off'); go.setAttribute('aria-disabled', 'true'); } else { go.href = ANDROID ? appUrl(s) : url(s); go.classList.remove('off'); go.removeAttribute('aria-disabled'); }
-    var web = $('b-web'); web.hidden = !ANDROID || !!s.err; if (!s.err) web.href = url(s);
+    mode(); var web = $('b-web'); web.hidden = !ANDROID || !!s.err; if (!s.err) web.href = url(s);
   }
   function url(s) {
     var title = (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : '');
@@ -825,11 +829,77 @@ h2 .q { margin-right: 8px; }
       'S.title=' + e(title) + ';S.description=' + e(details) + ';l.beginTime=' + s.ci.getTime() + ';l.endTime=' + last.getTime() +
       ';B.allDay=true;S.browser_fallback_url=' + e(url(s)) + ';end';
   }
-  if (ANDROID) {
-    $('b-go').textContent = '구글 캘린더 앱에 넣기'; $('b-go').removeAttribute('target');
-    $('b-note').innerHTML = '구글 캘린더 앱 새 일정 화면이 열려요. 위쪽 캘린더가 <b>비로소 예약</b>인지 확인하고 <b>저장</b>하세요. 막대는 <b>박 수만큼</b> 맞춰져 있어요.';
+  // 바로 저장: 캘린더 연결(설정 링크)이 된 휴대폰이면 Apps Script로 바로 저장. 아니면 예전처럼 캘린더 화면 열기
+  function link() { try { var c = JSON.parse(localStorage.getItem('calSrc') || 'null'); return c && c.u && c.k ? c : null; } catch (e) { return null; } }
+  var busy = false, last = null, undoT = 0;
+  function title(s) { return (s.room ? s.room + ' ' : '') + s.name + ' ' + s.to + (s.lang ? ' ' + s.lang : ''); }
+  function details(s) { var memo = $('b-memo').value.trim(); return '체크인 ' + ko(s.ci) + ' · 체크아웃 ' + ko(s.co) + ' · ' + s.n + '박' + (memo ? '\n' + memo : ''); }
+  function stat(t, warn) { var el = $('b-stat'); el.textContent = t || ''; el.hidden = !t; el.style.color = warn ? 'var(--warn)' : ''; }
+  function post(c, body) { return fetch(c.u, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
+  var FIELDS = ['b-room', 'b-lang', 'b-name', 'b-to', 'b-in', 'b-out', 'b-memo'];
+  function snap() { var o = {}; FIELDS.forEach(function (id) { o[id] = $(id).value; }); return o; }
+  function mode() {
+    var direct = !!link(), go = $('b-go'), web = $('b-web'), dbtn = $('b-direct');
+    dbtn.hidden = !direct; if (!busy) dbtn.textContent = '바로 저장';
+    web.textContent = '앱 대신 웹으로 열기';
+    if (ANDROID) {
+      go.textContent = '구글 캘린더 앱에 넣기'; go.removeAttribute('target');
+      $('b-note').innerHTML = '구글 캘린더 <b>앱</b>의 새 일정 화면이 다 채워져 열려요. 위쪽 캘린더가 <b>비로소 예약</b>인지 확인하고 <b>저장</b>하세요. 막대는 <b>박 수만큼</b> 맞춰져 있어요.';
+    } else {
+      go.textContent = '구글 캘린더에 넣기'; go.setAttribute('target', '_blank');
+      $('b-note').innerHTML = '구글 캘린더 새 일정 화면이 다 채워져 열려요(아이폰은 앱이 아니라 웹 화면). 캘린더가 <b>비로소 예약</b>인지 확인하고 <b>저장</b>만 누르세요.';
+    }
+    return direct;
   }
-  ['b-room', 'b-lang', 'b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
+  function fail(why) {
+    busy = false; mode();
+    stat(why + ' 「' + $('b-go').textContent + '」로 넣어 주세요.', true);
+  }
+  function save(force) {
+    var c = link(), s = state(); if (!c || busy || s.err) return;
+    busy = true; $('b-direct').textContent = '저장 중…'; $('b-force').hidden = true; stat('');
+    var keep = snap();
+    post(c, { k: c.k, a: 'add', title: title(s), ci: isoD(s.ci), co: isoD(s.co), to: s.to, memo: details(s), force: !!force })
+      .then(function (d) {
+        if (d && d.ok) {
+          busy = false; last = { id: d.id, keep: keep };
+          FIELDS.forEach(function (id) { $(id).value = ''; }); render();
+          var lastNight = new Date(s.co.getTime() - 864e5);
+          stat('저장됨 ✓ ' + d.t + ' · ' + md(s.ci) + (s.n > 1 ? '~' + md(lastNight) : '') + ' ' + s.n + '박');
+          $('b-undo').hidden = false; clearTimeout(undoT);
+          undoT = setTimeout(function () { $('b-undo').hidden = true; last = null; }, 20000);
+          window.dispatchEvent(new Event('biroso:calchanged'));
+          return;
+        }
+        if (d && d.error === 'dup') { busy = false; mode(); $('b-force').hidden = false; stat('이미 같은 예약이 있어요: ' + d.t + '. 다른 예약이면 「그래도 저장」을 누르세요.', true); return; }
+        fail(d && d.error === 'key' ? '캘린더 연결 키가 맞지 않아 저장하지 못했어요.' : d && d.error === 'calendar' ? '"비로소 예약" 캘린더를 찾지 못했어요.' : '저장하지 못했어요.');
+      })
+      .catch(function () { fail('저장하지 못했어요(인터넷 연결 또는 캘린더 설정 확인).'); });
+  }
+  $('b-force').addEventListener('click', function () { save(true); });
+  $('b-direct').addEventListener('click', function () {
+    var s = state();
+    if (s.err) { $('b-msg').textContent = s.err; return; }
+    save(false);
+  });
+  $('b-undo').addEventListener('click', function () {
+    var c = link(); if (!c || !last || busy) return;
+    busy = true; this.disabled = true; stat('되돌리는 중…');
+    var l = last;
+    post(c, { k: c.k, a: 'undo', id: l.id })
+      .then(function (d) {
+        busy = false; $('b-undo').disabled = false;
+        if (d && d.ok) {
+          clearTimeout(undoT); $('b-undo').hidden = true; last = null;
+          FIELDS.forEach(function (id) { $(id).value = l.keep[id]; }); render();
+          stat('되돌렸어요. 고쳐서 다시 저장하세요.');
+          window.dispatchEvent(new Event('biroso:calchanged'));
+        } else stat(d && d.error === 'old' ? '저장한 지 15분이 지나 되돌릴 수 없어요. 구글 캘린더에서 지워 주세요.' : '되돌리지 못했어요. 구글 캘린더에서 직접 지워 주세요.', true);
+      })
+      .catch(function () { busy = false; $('b-undo').disabled = false; stat('되돌리지 못했어요. 인터넷 연결을 확인해 주세요.', true); });
+  });
+  mode();
+  ['b-room', 'b-lang', 'b-name', 'b-to', 'b-in', 'b-out', 'b-memo'].forEach(function (id) { $(id).addEventListener('input', function () { if (!$('b-force').hidden) { $('b-force').hidden = true; stat(''); } render(); }); $(id).addEventListener('change', render); });
   $('b-in').addEventListener('change', function () { var ci = d(this.value), co = d($('b-out').value); if (ci && (!co || co <= ci)) { $('b-out').value = isoD(new Date(ci.getTime() + 864e5)); render(); } });
   $('b-go').addEventListener('click', function (e) {
     var s = state();
@@ -851,7 +921,7 @@ h2 .q { margin-right: 8px; }
 /* ? 설명 팝업: 칸마다 입력 방법·뜻. 자세한 내용은 manual.html (설명서) */
 (function () {
   var T = {
-    book: ['예약 넣기', '<p>예약을 받으면 여기에 적고 <b>구글 캘린더에 넣기</b>를 누르세요. 구글 캘린더 새 일정 화면이 다 채워져 열리고, <b>저장</b>만 누르면 끝이에요.</p><ul><li>캘린더는 <b>비로소 예약</b>으로 자동 선택</li><li>막대는 <b>박 수만큼</b> (1박 = 하루, 2박 = 이틀)</li><li>제목은 <code>2 홍길동 010-1234-5678</code> 모양으로 자동</li></ul>'],
+    book: ['예약 넣기', '<p>예약을 받으면 여기에 적고 <b>구글 캘린더 앱에 넣기</b>(아이폰은 <b>구글 캘린더에 넣기</b>)를 누르세요. 새 일정 화면이 다 채워져 열리고, <b>저장</b>만 누르면 끝이에요.</p><ul><li>캘린더가 연결된 휴대폰에는 <b>바로 저장</b> 버튼도 보여요 (화면 이동 없이 저장 · 중복 알림 · 20초 되돌리기)</li><li>캘린더는 <b>비로소 예약</b>으로 자동 선택</li><li>막대는 <b>박 수만큼</b> (1박 = 하루, 2박 = 이틀)</li><li>제목은 <code>2 홍길동 010-1234-5678</code> 모양으로 자동</li></ul>'],
     room: ['방', '<p>손님이 묵을 방. 정해지지 않았으면 <b>미정</b>. 고른 방번호가 캘린더 제목 맨 앞에 들어가 달력에서 한눈에 보여요.</p><ul><li><b>1·2번룸</b> 3인 · 싱글+퀸 (1번 1층, 2번 그 위 2층)</li><li><b>3·4번룸</b> 2인 · 퀸 (3번 2층, 4번 그 아래 1층)</li><li><b>5·6번룸</b> 2인 · 슈퍼싱글 2개 (1층 나란히)</li></ul>'],
     lang: ['문자 언어', '<p>외국 손님이면 <b>English · 中文 · 日本語</b> 중 하나. 제목 끝에 <code>EN</code> <code>中</code> <code>日</code>이 붙고, 오늘의 레터가 그 언어로 문자를 만들어요. 한국 손님은 그대로 <b>한국어</b>.</p>'],
     name: ['손님 이름', '<p>예약자 이름. 문자 첫머리 "OOO님"에 들어가요.</p><ul><li>같은 날 같은 이름이 두 분이면 <code>홍길동 1</code>, <code>홍길동 2</code></li><li>박 수 · 인원 · 재방 같은 표시는 이름에 넣지 말고 <b>메모</b>에</li></ul>'],
